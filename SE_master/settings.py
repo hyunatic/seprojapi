@@ -127,14 +127,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-ALLOWED_HOSTS = ['localhost', 'ntuseproj.herokuapp.com']
-
-LOGIN_URL=os.path.join(BASE_DIR,"seproj-master\public\login.html")
-MAX_CONTENT_LENGTH = 15
+ALLOWED_HOSTS = ['localhost']
 
 
 
-CORS_ORIGIN_ALLOW_ALL= True #any website can access to my API
+
+CORS_ORIGIN_ALLOW_ALL= True #any website can access to my API Set it to false whent delpoy
 CORS_URLS_REGEX = r'^/api/.*$'
 
 CORS_ALLOW_METHODS= [
@@ -146,14 +144,20 @@ CORS_ALLOW_METHODS= [
 
 ]
 
+#### USE THIS  AT THE END TO PREVENT CORS  HEADER
+#CORS_ORIGIN_WHITELIST = (
+#   'http//:localhost:8000',
+#)
+
 ####### EMAIL SETTING PLEASE CHANGE ACCORDIGNLY#################
 
 EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL="yonkathrow@gmail.com"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'EMAIL ADDRESS'
-EMAIL_HOST_PASSWORD = 'YOUR PASSWORD'
+EMAIL_HOST_USER = 'yonkathrow@gmail.com  '
+EMAIL_HOST_PASSWORD = 'Lovefood4ever'
 
 
 
