@@ -2,21 +2,108 @@
 from django.conf import  settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-MAX_TWEET_LENGTH = settings.MAX_CONTENT_LENGTH
-
 
 from rest_framework import serializers
+from .models import Post,Order
 #Model serializer allow us to use the existing model in model.py
 # So we no need to type out all the field
 
 
-#REF
-#https://www.youtube.com/watch?v=TmsD8QExZ84
+#Writing and Delete to the database is done here 
 
 
 
-# just use the basic seralizer if I wish to I can use Model seralizer
-# which take the auth_user model  like what is Single tweet 
+#On the contary I can just Create 1 big seralizer ??
+#But I prefer to make it independent such that each searlizer do certain task 
+
+class PostItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Post
+        fields='__all__'
+        #Need see how to picture it 
+        #'__all__'
+    
+    def CreatePost(self,validated_data):
+        userobj = User.objects.get(username=validated_data['username'])
+        uid =userobj.pk
+        print(uid)
+        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],ImageId=validated_data['ImageId'])
+   
+        try:
+            postobj.save()
+            return 1
+        except:
+            return 0
+   
+
+class DeleteItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Post
+        fields='__all__'
+
+
+    def DeletePost(self,validated_data):
+        try:
+            postobj = Post.objects.get(pk=validated_data['Postid'])
+            postobj.delete() 
+            return 1
+        except:
+            return 0 
+
+
+#If I also can make use this for View Item or Search Seralizer 
+class ViewItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+      model =Post
+      fields='__all__'
+    
+    def getusername(self ,value):
+        return value['username']
+
+
+
+
+
+#----------------------- Make ORDER Seralizer ---------------------------------------------------------------
+
+class  MakeOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
+
+    def makeOrder(self,validate_data):
+        return None
+
+# We need to query these and maybe store inside the object
+class ViewOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model=Order
+        fields='__all__'
+
+
+class DeleteOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
+        #Need see how to picture it 
+        #'__all__'
+    
+    def DeletePost(self,validated_data):
+        #name = Post()
+        #name.save()
+        return None
+
+
+
+#---------------------------- USER ACCOUNT Seralizer ------------------------------------------------------------------------------
+
+
+class getUsernameSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =User
+        fields=('id')   
+    def get_id(self,value):
+        return value['Userid']
 
 class LoginUserSeralizer(serializers.ModelSerializer):
     class Meta:
@@ -28,10 +115,12 @@ class LoginUserSeralizer(serializers.ModelSerializer):
 
     def get_password(self,value):
         return value['password']
+    
+    
 
     def checkauthentication (self ,userCode,passCode):
          user = authenticate(username= userCode, password=passCode)
-
+            #mean the user is found
          if user is not None:
                 return 1 
          else:
