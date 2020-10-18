@@ -198,7 +198,29 @@ def list_user_view(request ,*args ,**kwargs):
     seralizer = ViewItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
 
+#JSON format
+# {
+# "searchType": "Item_Name/Category",
+# "searchArg" : "XXXXXX"
+# }
 
+@api_view(['POST'])
+def search_post_Item(request ,*args ,**kwargs):
+
+    search_post_item_seralizer = SearchItemSeralizer()
+    searchType = search_post_item_seralizer.getSearchType(request.data)
+    searchArg = search_post_item_seralizer.getSearchArg(request.data)
+    qs= None
+
+    if searchType=="ItemName":
+        qs=Post.objects.filter(ItemName__contains=searchArg)
+    
+    elif searchType =="Category":
+        qs =Post.objects.filter(Category=searchArg)
+
+    
+    seralizer = ViewItemSeralizer(qs, many=True)
+    return Response(seralizer.data ,status=200)
 
 
 #JSON format to POST
