@@ -16,22 +16,35 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path 
 from backend import views
-
+from backend import Verifyaccount
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
 
+
+
     #Link to function view there is also Class API view 
-
-    # path('',views.home_view),
-    #path('create', views.create_tweet_view),
-    # path('api/listview', views.list_view),
-    # path('api/listview/<int:tweet_id>',views.single_tweet_view),
-
-
+    #For User credential
+    path('activate/<uidb64>/<token>',Verifyaccount.VertificationView.as_view(),name="activate"),
     path('api/create_User', views.create_User),
-    path('api/check_login',views.login),
+    path('api/check_Login',views.login),
+    path('api/get_Username',views.get_username),
+
+    #For Post
+    path('api/view_Item',views.list_view),
+    path('api/view_User_Item',views.list_user_view),
+    path('api/post_Item',views.postItem),
+    path('api/delete_Item',views.DeleteItem),
+     
+
 
    
 ]
+
+
+#--------------------------------- REF CODE----------------------------------------------------------------------   # path('',views.home_view),
+    #path('create', views.create_tweet_view),
+    # path('api/listview', views.list_view),
+    #path('api/search_Item/<str:Username>',views.list_single_view),
+    
