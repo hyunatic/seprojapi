@@ -34,6 +34,7 @@ from .models import Post
 #user2 password is         Unwanted2
 #user3 password is         Unwanted3
 
+#If not mention 0 mean API failed 1 mean API Pass 
 
 
 # To get the username baase on the userid 
