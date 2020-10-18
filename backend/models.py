@@ -8,9 +8,6 @@ from django.conf import settings
 # Assign the variable user Auth_User model which is the table that store our user..
 User = settings.AUTH_USER_MODEL 
 
-
-
-
 #This is your database Schema or MAP TO YOUR SQL
 #Content is the column therefore 
 
@@ -20,13 +17,12 @@ class Post(models.Model):
     ItemName = models.TextField()
     Category = models.TextField()
     Description= models.TextField()
-    ImageId = models.ImageField()       
+    ImageId = models.TextField()       
 
     class Meta:
         db_table='Post'
 
 class Order(models.Model):
-    #this is best to be a text field
     OrderId = models.AutoField(primary_key=True)
     Postid = models.ForeignKey(Post,on_delete=models.CASCADE)
     Userid = models.ForeignKey(User,on_delete=models.CASCADE)
@@ -38,6 +34,10 @@ class Order(models.Model):
     class Meta:
         db_table='Order'
 
+
+
+
+#------------------------------------   Ref Code------------------------------------------------------------------------------------------
 
 # class Tweet(models.Model):
 #     user = models.ForeignKey(User , on_delete=models.CASCADE) # basically form a relation with the AUTH_User model
