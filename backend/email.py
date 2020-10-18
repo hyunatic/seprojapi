@@ -12,7 +12,7 @@ def send_vertification_email(email_addr):
     send_mail(
         'Please activate your account ',
          message,
-        None,#Taken from default_from_email in settings.py
+         None,#Taken from default_from_email in settings.py
         [email_addr],
         fail_silently=False
 
