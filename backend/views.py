@@ -3,6 +3,7 @@
 #Import Django Library Some are kept just in case I need to use it 
 from django.shortcuts import render ,redirect
 from django.http import HttpResponse,JsonResponse
+
 # for not equals 
 #from django.db.models import Q 
 
@@ -17,15 +18,14 @@ from  rest_framework.response import Response
 from  rest_framework.decorators import api_view ,authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-
-
 from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import getUsernameSeralizer
 from .serializer import ViewItemSeralizer
 from .serializer import PostItemSeralizer
-from .serializer import  DeleteItemSeralizer
+from .serializer import DeleteItemSeralizer
+from .serializer import SearchItemSeralizer
 from .models import Post 
 
 
@@ -36,7 +36,6 @@ from .models import Post
 
 #If not mention 0 mean API failed 1 mean API Pass 
 
-
 # To get the username baase on the userid 
 #Since my list_view return the UID 
 #JSON Syntax 
@@ -44,6 +43,8 @@ from .models import Post
 # 
 #  "Userid":2
 # }
+
+
 @api_view(['POST'] )
 def get_username(request,*args, **kwargs):
     get_username_seralizer = getUsernameSeralizer()
@@ -53,18 +54,17 @@ def get_username(request,*args, **kwargs):
         "Result": userobj.username
     }
 
-
+    return Response(data,status=200)
 #JSON Syntax 
 # {
 #    "username":"user2",
 #    "password":"Unwanted2"
 # }
-    
 #Login APi the URL is at url.py 
 #Check the login get data via the URL
 #O= login fail  1=Pass
 
-    return Response(data,status=200)
+    
 @api_view(['POST'] )
 def login(request,*args,   **kwargs):
     
@@ -198,6 +198,7 @@ def list_user_view(request ,*args ,**kwargs):
     seralizer = ViewItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
 
+
 #JSON format
 # {
 # "searchType": "Item_Name/Category",
@@ -223,7 +224,9 @@ def search_post_Item(request ,*args ,**kwargs):
     return Response(seralizer.data ,status=200)
 
 
-#JSON format to POST
+
+
+#JSON format to POST Item
 #Userid just leave it 1 
 
 #Due to the model of Post and aut_user had a Many to  1 relation 
