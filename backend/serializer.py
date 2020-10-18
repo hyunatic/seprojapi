@@ -50,7 +50,7 @@ class CreateUserSerailizer(serializers.ModelSerializer):
     def getEmail(self,vaildate_data):
         return vaildate_data['email']
 
-    def create(self,validated_data):
+    def createUser(self,validated_data):
         user =User(username=validated_data['username'] ,email=validated_data['email'])
         user.set_password(validated_data['password'])
         user.is_active =False
