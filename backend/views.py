@@ -109,7 +109,7 @@ def create_User(request,*args,**kwargs):
         #IGNORE THE RED LINE if any 
         if create_user_seralizer.is_valid(raise_exception=True):
         #create_user_seralizer.save(is_active='False')
-            create_user_seralizer.create(request.data)
+            create_user_seralizer.createUser(request.data)
             data= {
             "Result": 1
             }
