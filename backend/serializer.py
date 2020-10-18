@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
+
 from .models import Post,Order
+
+
 #Model serializer allow us to use the existing model in model.py
 # So we no need to type out all the field
 
@@ -61,6 +64,21 @@ class ViewItemSeralizer(serializers.ModelSerializer):
         return value['username']
 
 
+ 
+
+class SearchItemSeralizer(serializers.Serializer):
+
+
+    searchType = serializers.CharField(max_length=50)
+    searchArg = serializers.CharField(max_length=50)
+    class Meta:
+      fields = ("searchType", "searchArg")
+
+    def getSearchType(self,value):
+        return value['searchType']
+    
+    def getSearchArg(self,value):
+        return value['searchArg']
 
 
 
