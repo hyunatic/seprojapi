@@ -114,8 +114,7 @@ def create_User(request,*args,**kwargs):
             "Result": 1
             }
             try:
-                user = User.objects.get(username=usercode)
-                send_vertification_email(user.email) 
+                send_vertification_email(emailcode) 
                 return Response(data, status=200) 
             except:
                 #if email FAILED For some funny reason 
