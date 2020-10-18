@@ -34,6 +34,7 @@ urlpatterns = [
     #For Post
     path('api/view_Item',views.list_view),
     path('api/view_User_Item',views.list_user_view),
+    path('api/search_Item',views.search_post_Item),
     path('api/post_Item',views.postItem),
     path('api/delete_Item',views.DeleteItem),
      
