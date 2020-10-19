@@ -91,7 +91,14 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
 
     def makeOrder(self,validate_data):
         return None
-
+    
+    
+class ApproveOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
+    
+    
 # We need to query these and maybe store inside the object
 class ViewOrderSeralizer(serializers.ModelSerializer):
     class Meta:
