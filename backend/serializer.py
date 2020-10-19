@@ -97,6 +97,9 @@ class ApproveOrderSeralizer(serializers.ModelSerializer):
     class Meta:
         model =Order
         fields='__all__'
+        
+    def approveOrder(self,validate_data):
+        return None 
     
     
 # We need to query these and maybe store inside the object
