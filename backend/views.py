@@ -184,14 +184,16 @@ def list_view(request,*args ,**kwargs):
 # {
 #     "username": "user2"
 # }
+#Error return username not found
 @api_view(['POST'])
 def list_user_view(request ,*args ,**kwargs):
 
     list_user_seralizer = ViewItemSeralizer(data=request.data)
-    
-    userarg = list_user_seralizer.getusername(request.data)
-    userobj = User.objects.get(username=userarg)
- 
+    try:
+        userarg = list_user_seralizer.getusername(request.data)
+        userobj = User.objects.get(username=userarg)
+    except:
+        return Response({"Result": "Username not found"}, status=500) 
     qs = Post.objects.filter(Userid=userobj)
 
     #set Many to true to return many value
