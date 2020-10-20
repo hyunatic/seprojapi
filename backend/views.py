@@ -1,342 +1,211 @@
-# THIS WHERE THE API CALLED HAPPEN
+from django.conf import  settings
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
-#Import Django Library Some are kept just in case I need to use it 
-from django.shortcuts import render ,redirect
-from django.http import HttpResponse,JsonResponse
+from rest_framework import serializers
 
-# for not equals 
-#from django.db.models import Q 
-
-from django.contrib.auth.models import User 
-from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings  #Import your setting from Django
+from .models import Post,Order
 
 
-#Import the rest-frame work Library
-from rest_framework.authentication import SessionAuthentication
-from  rest_framework.response import Response
-from  rest_framework.decorators import api_view ,authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+#Model serializer allow us to use the existing model in model.py
+# So we no need to type out all the field
 
-from .Verifyaccount import send_vertification_email
-from .serializer import CreateUserSerailizer
-from .serializer import LoginUserSeralizer
-from .serializer import getUsernameSeralizer
-from .serializer import ViewItemSeralizer
-from .serializer import PostItemSeralizer
-from .serializer import DeleteItemSeralizer
-from .serializer import SearchItemSeralizer
-from .models import Post 
+
+#Writing and Delete to the database is done here 
 
 
 
-#Administrator password is Unwanted1
-#user2 password is         Unwanted2
-#user3 password is         Unwanted3
+#On the contary I can just Create 1 big seralizer ??
+#But I prefer to make it independent such that each searlizer do certain task 
 
-#If not mention 0 mean API failed 1 mean API Pass 
-
-# To get the username baase on the userid 
-#Since my list_view return the UID 
-#JSON Syntax 
-# {
-# 
-#  "Userid":2
-# }
-
-
-@api_view(['POST'] )
-def get_username(request,*args, **kwargs):
-    get_username_seralizer = getUsernameSeralizer()
-    uid = get_username_seralizer.get_id(request.data)
-    userobj = User.objects.get(pk=uid)
-    data={
-        "Result": userobj.username
-    }
-
-    return Response(data,status=200)
-#JSON Syntax 
-# {
-#    "username":"user2",
-#    "password":"Unwanted2"
-# }
-#Login APi the URL is at url.py 
-#Check the login get data via the URL
-#O= login fail  1=Pass
-
+class PostItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Post
+        fields='__all__'
+        #Need see how to picture it 
+        #'__all__'
     
-@api_view(['POST'] )
-def login(request,*args,   **kwargs):
-    
-    Login_user_seralizer = LoginUserSeralizer()
-
-    usercode =Login_user_seralizer.get_username(request.data)
-    passcode = Login_user_seralizer.get_password(request.data)
-
-    resultvalue = Login_user_seralizer.checkauthentication(usercode,passcode)
-    data={
-            "Result": resultvalue
-     }
-    return Response(data, status=200) 
-
-
-
-
-
-
-# API to create user 
-
-#Format to follow : CASE SENSETIVE
-# {
-# 	"username": "user2",
-# 	"password": "123",
-# 	"email": "2@2.com"
-# }
-
-#1= Sucess  0= Failure in REST/Serializer  -1= Email Failure
-# HELPER METHOD usually it put on seperate File but Since only have 2 method I just leave it here 
-
-def check_userExist( userCode):
-    try:
-        User.objects.get(username=userCode)
-        #result found should not create the user 
-        return 1
-    except ObjectDoesNotExist:
-
-        return 0
-
-def check_emailExist(emailCode):
-    try:
-        User.objects.get(email=emailCode)
-        #result found should not create the user 
-        return 1
-    except ObjectDoesNotExist:
-
-         return 0
-
-
-# Call this the above 2 are just helper method
-#get data via JSON 
-@api_view(['POST'] )
-def create_User(request,*args,**kwargs):
-#ss
-    create_user_seralizer = CreateUserSerailizer(data=request.data)
-    #Now come the hard part of sending the request.data into here
-
-    usercode = create_user_seralizer.getUsername(request.data)
-    emailcode = create_user_seralizer.getEmail(request.data)
-
-    if check_emailExist(emailcode) == 1 :
-        data={
-            "Result": "Email already exist"
-        }
-        return Response(data,status=500)
-
-
-    if  check_userExist(usercode) == 1: 
-        data={
-            "Result": "Username  already exist"
-            
-        }
-        return Response(data,status=500)
-    else :
-        #IGNORE THE RED LINE if any 
-        if create_user_seralizer.is_valid(raise_exception=True):
-        #create_user_seralizer.save(is_active='False')
-            create_user_seralizer.createUser(request.data)
-            data= {
-            "Result": 1
-            }
-      
-            try:
-                send_vertification_email(emailcode) 
-                return Response(data, status=200) 
-            except:
-                #if email FAILED For some funny reason 
-                return Response({"Result": -1}, status=500) 
-
-        return Response({"Result": 0}, status=500) 
-           
-     
-
-
-
-
-
-
-
-#-----------------------------------------  CRUD Product Table-------------------------------------------------
-
-
-@api_view(['GET'])
-def list_view(request,*args ,**kwargs):
-    #Do not get the Administrator Post Item  
-     #userobj = User.objects.get(pk =1)
-     #qs = Post.objects.filter(~Q(Userid = userobj))
-     qs = Post.objects.all()
-     seralizer = ViewItemSeralizer(qs, many=True)
-
-     return Response(seralizer.data ,status=200)
-
-
-#List the post belong to the User
-#JSON Format for list_userview
-# {
-#     "username": "user2"
-# }
-#Error return username not found
-@api_view(['POST'])
-def list_user_view(request ,*args ,**kwargs):
-
-    list_user_seralizer = ViewItemSeralizer(data=request.data)
-    try:
-        userarg = list_user_seralizer.getusername(request.data)
-        userobj = User.objects.get(username=userarg)
-    except:
-        return Response({"Result": "Username not found"}, status=500) 
-    qs = Post.objects.filter(Userid=userobj)
-
-    #set Many to true to return many value
-    seralizer = ViewItemSeralizer(qs, many=True)
-    return Response(seralizer.data ,status=200)
-
-
-#JSON format
-# {
-# "searchType": "Item_Name/Category",
-# "searchArg" : "XXXXXX"
-# }
-
-@api_view(['POST'])
-def search_post_Item(request ,*args ,**kwargs):
-
-    search_post_item_seralizer = SearchItemSeralizer()
-    searchType = search_post_item_seralizer.getSearchType(request.data)
-    searchArg = search_post_item_seralizer.getSearchArg(request.data)
-    qs= None
-
-    if searchType=="ItemName":
-        qs=Post.objects.filter(ItemName__contains=searchArg)
-    
-    elif searchType =="Category":
-        qs =Post.objects.filter(Category=searchArg)
-
-    
-    seralizer = ViewItemSeralizer(qs, many=True)
-    return Response(seralizer.data ,status=200)
-
-
-
-
-#JSON format to POST Item
-#Userid just leave it 1 
-
-#Due to the model of Post and aut_user had a Many to  1 relation 
-#the model.seralizer need an User instance in that the case just pass in 1 which is the UID of the administrator
-#  {
-#    "Userid":1,
-#    "username": "user2",
-#    "ItemName":"Apple",
-#    "Category":"Iphone",
-#    "Description":"NOT 4 SALE",
-#    "ImageId": "Apple"
-#   }
-
-@api_view(['POST','GET'] )
-def postItem(request,*args, **kwargs):
-    create_post_seralizer = PostItemSeralizer(data=request.data)
-
-    if create_post_seralizer.is_valid(raise_exception=True):
-        #create_user_seralizer.save(is_active='False')
-        result_value=create_post_seralizer.CreatePost(request.data)
-
-        data= {
-        "Result": result_value
-        }
-    return Response(data, status=200) 
-
-
-
-#use this with list_user_view
-
-#JSON FORMAT
-#{
-#    "Postid" : 6
-#}
-
-@api_view(['POST','GET'] )
-def DeleteItem(request,*args, **kwargs):
-    Delete_post_seralizer = DeleteItemSeralizer()
-    resultvalue = Delete_post_seralizer.DeletePost(request.data)
- 
-    
-    data= {
-    "Result": resultvalue
-    }
-    return Response(data, status=200) 
-
-
-
-
-
-
-
-
-
-
-
-#-------------------------------REFERENCE CODE-------------------------------------------------------------------
-# @api_view(['GET'])
-# #This will throw an error if user is not authenticated 
-# #@authentication_classes(['SessionAuthentication'])
-# #@permission_classes([IsAuthenticated])
-# def list_view(request,*args  ,**kwargs):
-#     qs = Tweet.objects.all()
-    
-#     seralizer = TweetSerializer(qs, many=True)
-
+    def CreatePost(self,validated_data):
+        userobj = User.objects.get(username=validated_data['username'])
+        uid =userobj.pk
+        print(uid)
+        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],postDate=validated_data['postDate'],ImageId=validated_data['ImageId'])
    
-#     return Response(seralizer.data ,status=200)
+        try:
+            postobj.save()
+            return 1
+        except:
+            return 0
+   
+
+class DeleteItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Post
+        fields='__all__'
+
+
+    def DeletePost(self,validated_data):
+        try:
+            postobj = Post.objects.get(pk=validated_data['Postid'])
+            postobj.delete() 
+            return 1
+        except:
+            return 0 
+
+
+#If I also can make use this for View Item or Search Seralizer 
+class ViewItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+      model =Post
+      fields='__all__'
+    
+    def getusername(self ,value):
+        return value['username']
+
+
+ 
+
+class SearchItemSeralizer(serializers.Serializer):
+
+
+    searchType = serializers.CharField(max_length=50)
+    searchArg = serializers.CharField(max_length=50)
+    class Meta:
+      fields = ("searchType", "searchArg")
+
+    def getSearchType(self,value):
+        return value['searchType']
+    
+    def getSearchArg(self,value):
+        return value['searchArg']
 
 
 
-# @api_view(['GET'])
-# def single_tweet_view(request, tweet_id ,*args ,**kwargs):
+#----------------------- Make ORDER Seralizer ---------------------------------------------------------------
 
-#     qs = Tweet.objects.filter(id= tweet_id)
+class  MakeOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
 
-#     if not qs.exists: 
-#         print("This is a test ")
-#         return Response({} ,status=404)
-
-#     obj = qs.first()
-#     if obj == None: 
-#         return Response({} ,status=404)
-        
-#     seralizer = TweetSerializer(obj)
-#     return Response(seralizer.data ,status=200)
-
-
-
-
-# #this method only support POST  and must authenticated
-# #WE CAN USE CLASS BASED VIEW TO help prevent repeating code 
-# @api_view(['POST'])
-# def create_tweet_view(request ,*args ,**kwargs):
-
-#     serializer = TweetSerializer(data=request.POST)
-
-#     #send back what the error is before
-#     if serializer.is_valid(raise_exception=True):
-#         serializer.save(user=request.user)
-#         return Response(serializer.data, status=201)
-
-#     return Response({},status =400)
+    def makeOrder(self,validate_data):
+        #try:
+            #get the username
+            userobj = User.objects.get(username=validate_data['username'])
+            postobj = Post.objects.get(pk=validate_data['Postid'])
+            
+            orderobj = Order(Postid=postobj,Userid=userobj,Date=validate_data['Date'],Time=validate_data['Time'],Location=validate_data['location'],MovingService=validate_data['movingService'])        
+            orderobj.OrderConfirm=False
+            orderobj.save()
+            return 1 
+       # except:
+        #    return 0
 
 
+class ApproveOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
+    def approveOrder(self,validate_data):
+        #get the object base on OID
+        #I can do a second level check 
+        #But most likely I use try and except If I can`t
+        #then i delete it 
+        return None 
+
+# We need to query these and maybe store inside the object
+class ViewOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model=Order
+        fields='__all__'
 
 
-# #THE MAINPAGE
-# def home_view(request, *args,**kwargs):
-#     #return HttpResponse("<h1> This is just a basic view for HTML</h1>")
-#     return render(request,'public/index.html',context={},status=200)
+class DeleteOrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields='__all__'
+        #Need see how to picture it 
+        #'__all__'
+    
+    def DeleteOrder(self,validated_data):
+        #name = Post()
+        #name.save()
+        return None
+
+
+
+#---------------------------- USER ACCOUNT Seralizer ------------------------------------------------------------------------------
+
+
+class getUsernameSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =User
+        fields=('id')   
+    def get_id(self,value):
+        return value['Userid']
+
+class LoginUserSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields=('username','password')
+    
+    def get_username(self ,value):
+        return value['username']
+
+    def get_password(self,value):
+        return value['password']
+    
+    
+
+    def checkauthentication (self ,userCode,passCode):
+         user = authenticate(username= userCode, password=passCode)
+            #mean the user is found
+         if user is not None:
+                return 1 
+         else:
+                return 0
+
+
+class CreateUserSerailizer(serializers.ModelSerializer):
+
+    class Meta:
+            model= User
+            fields=('username','password','email')
+
+    def getUsername(self,vaildated_data):
+        return vaildated_data['username']
+    
+    def getEmail(self,vaildate_data):
+        return vaildate_data['email']
+
+    def createUser(self,validated_data):
+        user =User(username=validated_data['username'] ,email=validated_data['email'])
+        user.set_password(validated_data['password'])
+        user.is_active =False
+        user.save()
+        return user
+
+    
+
+
+#---------------------------------------- ref code ------------------------------------------------
+#THIS IS SIMILAR TO FORM Model serializer mean we use the database 
+#GONNA use this for Database 
+
+#from .models import Tweet
+
+# class TweetSerializer(serializers.ModelSerializer):
+   
+#     class Meta:
+#         model = Tweet
+#         fields=['content','id'] # we may refer to the Doc (API GUIDE) fields='_all_'
+#                                 #there is also exclude 
+
+#     #the actual value of the field
+#     def validate_content(self,value):
+#         if len(value) > MAX_TWEET_LENGTH:
+#             raise serializers.ValidationError("You had exceed the world length of " + str(MAX_TWEET_LENGTH))
+
+#         return value 
+
+    
