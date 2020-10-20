@@ -38,7 +38,8 @@ urlpatterns = [
     path('api/post_Item',views.postItem),
     path('api/delete_Item',views.DeleteItem),
      
-
+    #For Order
+    path('api/make_Order',views.makeOrder),
 
    
 ]
