@@ -18,7 +18,7 @@ from  rest_framework.response import Response
 from  rest_framework.decorators import api_view ,authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .Verifyaccount import send_vertification_email
+#from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import getUsernameSeralizer
@@ -150,7 +150,7 @@ def create_User(request,*args,**kwargs):
             }
       
             try:
-                send_vertification_email(emailcode) 
+                #send_vertification_email(emailcode) 
                 return Response(data, status=200) 
             except:
                 #if email FAILED For some funny reason 
