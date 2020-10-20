@@ -1,4 +1,3 @@
-
 from django.conf import  settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -30,7 +29,7 @@ class PostItemSeralizer(serializers.ModelSerializer):
         userobj = User.objects.get(username=validated_data['username'])
         uid =userobj.pk
         print(uid)
-        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],ImageId=validated_data['ImageId'])
+        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],postDate=validated_data['postDate'],ImageId=validated_data['ImageId'])
    
         try:
             postobj.save()
@@ -90,18 +89,30 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
         fields='__all__'
 
     def makeOrder(self,validate_data):
-        return None
-    
-    
+        #try:
+            #get the username
+            userobj = User.objects.get(username=validate_data['username'])
+            postobj = Post.objects.get(pk=validate_data['Postid'])
+            
+            orderobj = Order(Postid=postobj,Userid=userobj,Date=validate_data['Date'],Time=validate_data['Time'],Location=validate_data['location'],MovingService=validate_data['movingService'])        
+            orderobj.OrderConfirm=False
+            orderobj.save()
+            return 1 
+       # except:
+        #    return 0
+
+
 class ApproveOrderSeralizer(serializers.ModelSerializer):
     class Meta:
         model =Order
         fields='__all__'
-        
     def approveOrder(self,validate_data):
+        #get the object base on OID
+        #I can do a second level check 
+        #But most likely I use try and except If I can`t
+        #then i delete it 
         return None 
-    
-    
+
 # We need to query these and maybe store inside the object
 class ViewOrderSeralizer(serializers.ModelSerializer):
     class Meta:
@@ -116,7 +127,7 @@ class DeleteOrderSeralizer(serializers.ModelSerializer):
         #Need see how to picture it 
         #'__all__'
     
-    def DeletePost(self,validated_data):
+    def DeleteOrder(self,validated_data):
         #name = Post()
         #name.save()
         return None
