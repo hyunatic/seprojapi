@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path 
 from backend import views
-from backend import email
+from backend import email as Verifyaccount 
 
 urlpatterns = [
 
@@ -26,7 +26,7 @@ urlpatterns = [
 
     #Link to function view there is also Class API view 
     #For User credential
-    path('activate/<uidb64>/<token>',email.VertificationView.as_view(),name="activate"),
+    path('activate/<uidb64>/<token>',Verifyaccount.VertificationView.as_view(),name="activate"),
     path('api/create_User', views.create_User),
     path('api/check_Login',views.login),
     path('api/get_Username',views.get_username),
