@@ -1,6 +1,11 @@
 from django.db import models
 #taken from the website 
 from django.conf import settings 
+from django.contrib.auth.models import User
+
+
+
+
 
 
 # Create your models here.(Noted every changes you make to the class  we had to make migration and migrate inside the terminal)
@@ -8,15 +13,24 @@ from django.conf import settings
 # Assign the variable user Auth_User model which is the table that store our user..
 User = settings.AUTH_USER_MODEL 
 
+
+class Profile(models.Model):
+    Userid= models.ForeignKey(User,on_delete=models.CASCADE,related_name='profile')
+    Hall = models.CharField(max_length=50)
+    
+    class Meta:
+        db_table='Profile'
+
 #This is your database Schema or MAP TO YOUR SQL
 #Content is the column therefore 
 
 class Post(models.Model):
     Postid = models.AutoField(primary_key=True)
-    Userid = models.ForeignKey(User,on_delete=models.CASCADE)
+    Userid = models.ForeignKey(User,on_delete=models.CASCADE ,related_name='posting')
     ItemName = models.TextField()
     Category = models.TextField()
     Description= models.TextField()
+    postDate = models.DateField()
     ImageId = models.TextField()       
 
     class Meta:
@@ -28,6 +42,7 @@ class Order(models.Model):
     Userid = models.ForeignKey(User,on_delete=models.CASCADE)
     Date = models.DateField()
     Time = models.TimeField()
+    Location = models.TextField(default='')
     MovingService = models.BooleanField(default=False)
     OrderConfirm = models.BooleanField(default=False)
 
