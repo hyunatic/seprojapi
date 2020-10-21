@@ -1,11 +1,26 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as baseAdmin
+from django.contrib.auth.models import User
+from .models import Post,Order,Profile
 
 
+#register the two table that I had created 
+admin.site.register(Post)
+admin.site.register(Order)
 
 
+class proflieinLine(admin.StackedInline):
+    model = Profile
+    can_delete= False
+    verbose_name_plural="Profile"
 
 
-#----------------------- Ref code to customize Django Admin --------------------------------
+class UserAdmin(baseAdmin):
+    inlines=(proflieinLine,)
+
+admin.site.unregister(User)
+admin.site.register(User,UserAdmin)
+    #----------------------- Ref code to customize Django Admin --------------------------------
 #from .models import Tweet, HistoryLike
 # Register your models here.
 #to show our Tweet table (NOTE OUR SQL NEED TO HAVE IT)
