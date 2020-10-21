@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
-from .models import Post,Order
+from .models import Post,Order,Profile
 
 
 #Model serializer allow us to use the existing model in model.py
@@ -27,10 +27,11 @@ class PostItemSeralizer(serializers.ModelSerializer):
     
     def CreatePost(self,validated_data):
         userobj = User.objects.get(username=validated_data['username'])
-        uid =userobj.pk
-        print(uid)
+        #profileobj =Profile.objects.get(Userid=userobj.pk)
+        #print(uid)
         postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],postDate=validated_data['postDate'],ImageId=validated_data['ImageId'])
-   
+        postobj.save()
+        
         try:
             postobj.save()
             return 1
@@ -53,18 +54,44 @@ class DeleteItemSeralizer(serializers.ModelSerializer):
             return 0 
 
 
-#If I also can make use this for View Item or Search Seralizer 
-class ViewItemSeralizer(serializers.ModelSerializer):
-    class Meta:
-      model =Post
-      fields='__all__'
-    
-    def getusername(self ,value):
-        return value['username']
 
+
+
+#their student is your User
+#Mark is your view Item 
+#From there see if you can add one more 
+class viewchildItemSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model=Post
+        exclude = ['Userid']
+
+
+class viewchildProfileSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model=Profile
+        fields=['Hall']
+        
+
+
+class ViewItemSeralizer(serializers.ModelSerializer):
+    posting=viewchildItemSeralizer(read_only=True ,many=True)
+    profile = viewchildProfileSeralizer(read_only=True,many=True)
+    class Meta:
+        model=User
+        fields=['username','email','posting','profile']
+    def getusername(self,vaildatedata):
+        return vaildatedata['username']
 
  
 
+class SearchPostSeralizer(serializers.ModelSerializer):
+    #user =
+    class Meta:
+        model=Post
+        fields='__all__'
+
+
+#This May need to CHANGE ALSO
 class SearchItemSeralizer(serializers.Serializer):
 
 
@@ -81,7 +108,11 @@ class SearchItemSeralizer(serializers.Serializer):
 
 
 
+
+
 #----------------------- Make ORDER Seralizer ---------------------------------------------------------------
+
+
 
 class  MakeOrderSeralizer(serializers.ModelSerializer):
     class Meta:
@@ -181,11 +212,15 @@ class CreateUserSerailizer(serializers.ModelSerializer):
     def createUser(self,validated_data):
         user =User(username=validated_data['username'] ,email=validated_data['email'])
         user.set_password(validated_data['password'])
+
         user.is_active =False
+        
         user.save()
+        profileobj = Profile(Userid=user,Hall=validated_data['Hall'])
+        profileobj.save()
         return user
 
-    
+
 
 
 #---------------------------------------- ref code ------------------------------------------------
