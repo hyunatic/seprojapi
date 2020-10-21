@@ -5,7 +5,7 @@ from django.shortcuts import render ,redirect
 from django.http import HttpResponse,JsonResponse
 
 # for not equals 
-#from django.db.models import Q 
+from django.db.models import Q 
 
 from django.contrib.auth.models import User 
 from django.core.exceptions import ObjectDoesNotExist
@@ -27,8 +27,10 @@ from .serializer import PostItemSeralizer
 from .serializer import DeleteItemSeralizer
 from .serializer import SearchItemSeralizer
 from .serializer import MakeOrderSeralizer
-from .models import Post 
 
+
+
+from .models import Post ,Order ,Profile
 from .Verifyaccount import send_vertification_email;
 
 #Administrator password is Unwanted1
@@ -37,35 +39,36 @@ from .Verifyaccount import send_vertification_email;
 
 #If not mention 0 mean API failed 1 mean API Pass 
 
-# To get the username baase on the userid 
+# To get the username base on the userid 
 #Since my list_view return the UID 
 #JSON Syntax 
 # {
 # 
 #  "Userid":2
 # }
-
-
 @api_view(['POST'] )
 def get_username(request,*args, **kwargs):
     get_username_seralizer = getUsernameSeralizer()
     uid = get_username_seralizer.get_id(request.data)
     userobj = User.objects.get(pk=uid)
+    
     data={
         "Result": userobj.username
     }
 
     return Response(data,status=200)
+
+
+
+
+#Login APi the URL is at url.py 
+#Check the login get data via the URL
+#0= login fail  1=Pass
 #JSON Syntax 
 # {
 #    "username":"user2",
 #    "password":"Unwanted2"
 # }
-#Login APi the URL is at url.py 
-#Check the login get data via the URL
-#O= login fail  1=Pass
-
-    
 @api_view(['POST'] )
 def login(request,*args,   **kwargs):
     
@@ -91,12 +94,12 @@ def login(request,*args,   **kwargs):
 # {
 # 	"username": "user2",
 # 	"password": "123",
-# 	"email": "2@2.com"
+# 	"email": "2@2.com",
+#   "Hall": " "
 # }
 
 #1= Sucess  0= Failure in REST/Serializer  -1= Email Failure
 # HELPER METHOD usually it put on seperate File but Since only have 2 method I just leave it here 
-
 def check_userExist( userCode):
     try:
         User.objects.get(username=userCode)
@@ -115,12 +118,10 @@ def check_emailExist(emailCode):
 
          return 0
 
-
 # Call this the above 2 are just helper method
 #get data via JSON 
 @api_view(['POST'] )
 def create_User(request,*args,**kwargs):
-#ss
     create_user_seralizer = CreateUserSerailizer(data=request.data)
     #Now come the hard part of sending the request.data into here
 
@@ -168,16 +169,16 @@ def create_User(request,*args,**kwargs):
 
 #-----------------------------------------  CRUD Product Table-------------------------------------------------
 
-
 @api_view(['GET'])
 def list_view(request,*args ,**kwargs):
     #Do not get the Administrator Post Item  
-     #userobj = User.objects.get(pk =1)
-     #qs = Post.objects.filter(~Q(Userid = userobj))
-     qs = Post.objects.all()
-     seralizer = ViewItemSeralizer(qs, many=True)
+    qs = User.objects.filter(~Q(id = 1))
+     #I need to display the hall
+    #qs = Post.objects.all()
+    
+    seralizer = ViewItemSeralizer(qs, many=True)
 
-     return Response(seralizer.data ,status=200)
+    return Response(seralizer.data ,status=200)
 
 
 #List the post belong to the User
@@ -194,7 +195,7 @@ def list_user_view(request ,*args ,**kwargs):
         userobj = User.objects.get(username=userarg)
     except:
         return Response({"Result": "Username not found"}, status=500) 
-    qs = Post.objects.filter(Userid=userobj)
+    qs = User.objects.filter(pk=userobj.pk)
 
     #set Many to true to return many value
     seralizer = ViewItemSeralizer(qs, many=True)
@@ -216,14 +217,20 @@ def search_post_Item(request ,*args ,**kwargs):
     qs= None
 
     if searchType=="ItemName":
-        qs=Post.objects.filter(ItemName__contains=searchArg) #for this query is not case senstive
-    
-    elif searchType =="Category":
-        qs =Post.objects.filter(Category=searchArg) #for this query is case senstive
+        
+        qs=User.objects.filter(post__name=searchArg)
+        
 
-    
+        
+    elif searchType =="Category":
+        qs =Post.objects.filter(Category__iexact=searchArg) 
+    elif searchType =='Hall':
+        Hallobj = Profile.objects.get(Hall=searchArg)
+        #qs= User.objects.get(pk=Hallobj.)
+        
     seralizer = ViewItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
+    #return Response({"Result": 0}, status=500) 
 
 
 
