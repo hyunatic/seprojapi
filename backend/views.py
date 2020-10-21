@@ -18,7 +18,7 @@ from  rest_framework.response import Response
 from  rest_framework.decorators import api_view ,authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .email import send_vertification_email
+from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import getUsernameSeralizer
@@ -29,7 +29,7 @@ from .serializer import SearchItemSeralizer
 from .serializer import MakeOrderSeralizer
 from .models import Post 
 
-
+from .Verifyaccount import send_vertification_email;
 
 #Administrator password is Unwanted1
 #user2 password is         Unwanted2
@@ -148,9 +148,9 @@ def create_User(request,*args,**kwargs):
             data= {
             "Result": 1
             }
-      
+            send_vertification_email(emailcode) 
             try:
-                #send_vertification_email(emailcode) 
+                send_vertification_email(emailcode) 
                 return Response(data, status=200) 
             except:
                 #if email FAILED For some funny reason 
@@ -203,7 +203,7 @@ def list_user_view(request ,*args ,**kwargs):
 
 #JSON format
 # {
-# "searchType": "Item_Name/Category",
+# "searchType": "Item_Name/Category/Hall/DateASC/DateDESC",
 # "searchArg" : "XXXXXX"
 # }
 
@@ -216,10 +216,10 @@ def search_post_Item(request ,*args ,**kwargs):
     qs= None
 
     if searchType=="ItemName":
-        qs=Post.objects.filter(ItemName__contains=searchArg)
+        qs=Post.objects.filter(ItemName__contains=searchArg) #for this query is not case senstive
     
     elif searchType =="Category":
-        qs =Post.objects.filter(Category=searchArg)
+        qs =Post.objects.filter(Category=searchArg) #for this query is case senstive
 
     
     seralizer = ViewItemSeralizer(qs, many=True)
