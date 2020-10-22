@@ -13,10 +13,11 @@ from django.conf import settings  #Import your setting from Django
 
 
 #Import the rest-frame work Library
-from rest_framework.authentication import SessionAuthentication
 from  rest_framework.response import Response
-from  rest_framework.decorators import api_view ,authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from  rest_framework.decorators import api_view  
+from rest_framework.views import APIView
+
+
 
 from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
@@ -25,11 +26,10 @@ from .serializer import getUsernameSeralizer
 from .serializer import ViewItemSeralizer
 from .serializer import PostItemSeralizer
 from .serializer import DeleteItemSeralizer
-from .serializer import SearchItemSeralizer
+from .serializer import SearchdetailSeralizer
+from .serializer import searchItemSeralizer
+
 from .serializer import MakeOrderSeralizer
-
-
-
 from .models import Post ,Order ,Profile
 from .Verifyaccount import send_vertification_email;
 
@@ -118,7 +118,7 @@ def check_emailExist(emailCode):
 
          return 0
 
-# Call this the above 2 are just helper method
+# Call  the above 2 are just helper method
 #get data via JSON 
 @api_view(['POST'] )
 def create_User(request,*args,**kwargs):
@@ -173,10 +173,12 @@ def create_User(request,*args,**kwargs):
 def list_view(request,*args ,**kwargs):
     #Do not get the Administrator Post Item  
     qs = User.objects.filter(~Q(id = 1))
-     #I need to display the hall
-    #qs = Post.objects.all()
-    
     seralizer = ViewItemSeralizer(qs, many=True)
+
+    #Another way
+    # qs = Post.objects.all().order_by('Userid')
+    # seralizer = searchItemSeralizer(qs,many=True)
+    
 
     return Response(seralizer.data ,status=200)
 
@@ -188,6 +190,7 @@ def list_view(request,*args ,**kwargs):
 # }
 @api_view(['POST'])
 def list_user_view(request ,*args ,**kwargs):
+
 
     list_user_seralizer = ViewItemSeralizer(data=request.data)
     try:
@@ -204,34 +207,49 @@ def list_user_view(request ,*args ,**kwargs):
 
 #JSON format
 # {
-# "searchType": "Item_Name/Category/Hall/DateASC/DateDESC",
+# "searchType": "Item_Name/Category/Hall",
 # "searchArg" : "XXXXXX"
 # }
 
-@api_view(['POST'])
-def search_post_Item(request ,*args ,**kwargs):
+#Another way to define .. this is call class based vieW
+class search_post_Item(APIView ):
+    #if the API is a POST request
+    def post(self,request,format=None):
+        search_post_item_seralizer = SearchdetailSeralizer()
+        searchType = search_post_item_seralizer.getSearchType(request.data)
+        searchArg = search_post_item_seralizer.getSearchArg(request.data)
+        qs= None
 
-    search_post_item_seralizer = SearchItemSeralizer()
-    searchType = search_post_item_seralizer.getSearchType(request.data)
-    searchArg = search_post_item_seralizer.getSearchArg(request.data)
-    qs= None
+        if searchType=="ItemName":
+            
+            #there should be  a better way
+            qs=Post.objects.filter(ItemName__icontains=searchArg) 
 
-    if searchType=="ItemName":
-        
-        qs=User.objects.filter(post__name=searchArg)
-        
+            seralizer =searchItemSeralizer(qs,many=True)
+            
+            return Response(seralizer.data ,status=200)
 
-        
-    elif searchType =="Category":
-        qs =Post.objects.filter(Category__iexact=searchArg) 
-    elif searchType =='Hall':
-        Hallobj = Profile.objects.get(Hall=searchArg)
-        #qs= User.objects.get(pk=Hallobj.)
-        
-    seralizer = ViewItemSeralizer(qs, many=True)
-    return Response(seralizer.data ,status=200)
-    #return Response({"Result": 0}, status=500) 
 
+        elif searchType =="Category":
+
+            qs =Post.objects.filter(Category__iexact=searchArg) 
+            seralizer =searchItemSeralizer(qs,many=True)
+            return Response(seralizer.data ,status=200)
+
+        elif searchType =='Hall':
+        #Hallobj = Profile.objects.get(Hall=searchArg)
+            
+           # keep thing simiple RAW SQL
+            qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s",[searchArg])
+            seralizer=searchItemSeralizer(qs,many=True)
+            return Response(seralizer.data ,status=200)
+
+
+        return Response({"Result": -1}, status=500) 
+
+
+    def get(self,request,format=None):
+        return Response({"Result": -1}, status=500) 
 
 
 
