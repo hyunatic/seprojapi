@@ -38,7 +38,6 @@ class PostItemSeralizer(serializers.ModelSerializer):
         except:
             return 0
    
-
 class DeleteItemSeralizer(serializers.ModelSerializer):
     class Meta:
         model =Post
@@ -55,11 +54,6 @@ class DeleteItemSeralizer(serializers.ModelSerializer):
 
 
 
-
-
-#their student is your User
-#Mark is your view Item 
-#From there see if you can add one more 
 class viewchildItemSeralizer(serializers.ModelSerializer):
     class Meta:
         model=Post
@@ -82,17 +76,25 @@ class ViewItemSeralizer(serializers.ModelSerializer):
     def getusername(self,vaildatedata):
         return vaildatedata['username']
 
- 
 
-class SearchPostSeralizer(serializers.ModelSerializer):
-    #user =
+class searchItemSeralizer(serializers.ModelSerializer):
+    Username = serializers.SerializerMethodField('get_username',read_only=True)
+    Hall = serializers.SerializerMethodField('get_hall',read_only=True)
+
+
     class Meta:
         model=Post
-        fields='__all__'
+        fields=('Postid','Username','ItemName','Category','Description','PostDate','ImageId','Hall')
+
+    def get_username(self,obj):
+        return str(obj.Userid.username)
+
+    def get_hall(self,obj):
+        userobj = Profile.objects.get(Userid=obj.Userid)
+        return userobj.Hall
 
 
-#This May need to CHANGE ALSO
-class SearchItemSeralizer(serializers.Serializer):
+class SearchdetailSeralizer(serializers.Serializer):
 
 
     searchType = serializers.CharField(max_length=50)
@@ -105,9 +107,6 @@ class SearchItemSeralizer(serializers.Serializer):
     
     def getSearchArg(self,value):
         return value['searchArg']
-
-
-
 
 
 #----------------------- Make ORDER Seralizer ---------------------------------------------------------------
