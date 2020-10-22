@@ -15,6 +15,7 @@ User = settings.AUTH_USER_MODEL
 
 
 class Profile(models.Model):
+    #orginally this is onetoone field but 
     Userid= models.ForeignKey(User,on_delete=models.CASCADE,related_name='profile')
     Hall = models.CharField(max_length=50)
     
@@ -30,16 +31,17 @@ class Post(models.Model):
     ItemName = models.TextField()
     Category = models.TextField()
     Description= models.TextField()
-    postDate = models.DateField()
+    PostDate = models.DateField()
     ImageId = models.TextField()       
 
     class Meta:
         db_table='Post'
 
+
 class Order(models.Model):
     OrderId = models.AutoField(primary_key=True)
     Postid = models.ForeignKey(Post,on_delete=models.CASCADE)
-    Userid = models.ForeignKey(User,on_delete=models.CASCADE)
+    req_Userid = models.ForeignKey(User,on_delete=models.CASCADE)
     Date = models.DateField()
     Time = models.TimeField()
     Location = models.TextField(default='')
