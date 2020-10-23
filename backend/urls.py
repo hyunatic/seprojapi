@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path 
 from backend import views
-from backend import email as Verifyaccount 
+from backend import Verifyaccount 
 
 urlpatterns = [
 
