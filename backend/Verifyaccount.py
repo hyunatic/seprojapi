@@ -73,11 +73,13 @@ def get_vertification_link(userobj):
     
     
     #AMMEND THIS set your domain Since it a helper method there is no request 
-    domain = "localhost:8000"
+    #domain = "localhost:8000"
+    domain = "http://seproj.s3-website-ap-southeast-1.amazonaws.com/"
 
 
     link=reverse('activate',kwargs={'uidb64':uidb64 ,'token':  token_generator.make_token(userobj)})
-    return "http://"+domain+link
+    #return "http://"+domain+link
+    return domain+link
 
 
 
