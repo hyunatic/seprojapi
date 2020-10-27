@@ -23,6 +23,7 @@ from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import getUsernameSeralizer
+from .serializer import SuccessLoginSeralizer
 
 
 from .serializer import PostItemSeralizer
@@ -79,6 +80,14 @@ def login(request,*args,   **kwargs):
     passcode = Login_user_seralizer.get_password(request.data)
 
     resultvalue = Login_user_seralizer.checkauthentication(usercode,passcode)
+    
+    if(resultvalue == 1 ):
+
+        qs = User.objects.get(username=usercode)
+        seralizer = SuccessLoginSeralizer(qs)
+        return Response(seralizer.data ,status=200)
+    
+    
     data={
             "Result": resultvalue
      }
