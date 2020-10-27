@@ -74,8 +74,8 @@ def get_vertification_link(userobj):
     
     
     #AMMEND THIS set your domain Since it a helper method there is no request 
-    domain = "localhost:8000"
-    #domain = "https://ntuseproj.herokuapp.com/"
+    #domain = "localhost:8000"
+    domain = "https://ntuseproj.herokuapp.com/"
 
 
     link=reverse('activate',kwargs={'uidb64':uidb64 ,'token':  token_generator.make_token(userobj)})
