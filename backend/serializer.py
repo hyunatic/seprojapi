@@ -195,6 +195,12 @@ class LoginUserSeralizer(serializers.ModelSerializer):
                 return 0
 
 
+class SuccessLoginSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields=('username','email')
+
+
 class CreateUserSerailizer(serializers.ModelSerializer):
 
     class Meta:
