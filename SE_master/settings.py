@@ -145,19 +145,19 @@ CORS_ALLOW_METHODS= [
 ]
 
 #### USE THIS  AT THE END TO PREVENT CORS  HEADER
-#CORS_ORIGIN_WHITELIST = (
+# CORS_ORIGIN_WHITELIST = (
 #   'http//:localhost:8000',
-#)
+# )
 
 ####### EMAIL SETTING PLEASE CHANGE ACCORDIGNLY#################
 
 EMAIL_BACKEND= 'django.core.mail.backends.smtp.EmailBackend'
-DEFAULT_FROM_EMAIL="habbo_armageddon@hotmail.com"
-EMAIL_HOST = 'outlook.office365.com'
+DEFAULT_FROM_EMAIL="unwantedntu@gmail.com"
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
-EMAIL_PORT = 993
-EMAIL_HOST_USER = ' AUTHENTICATION EMAIL .... DEPEND ON SMTP SERVER IF NEED CREDENTIAL THAN INPUT'
-EMAIL_HOST_PASSWORD = 'aideiskandar123'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'unwantedntu@gmail.com'
+EMAIL_HOST_PASSWORD = 'cpl12454'
 
 
 

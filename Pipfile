@@ -7,12 +7,14 @@ verify_ssl = true
 
 [packages]
 django = "*"
-djangorestframework = "*"
-django-heroku = "*"
-gunicorn = "*"
-psycopg2 = "*"
 django-cors-headers = "*"
+djangorestframework = "*"
+django-utils-six = "*"
+django-heroku = "*"
 pillow = "*"
+psycopg2 = "*"
+gunicorn = "*"
+django-six = "*"
 
 [requires]
 python_version = "3.8"

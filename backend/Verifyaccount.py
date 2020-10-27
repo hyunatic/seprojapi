@@ -19,7 +19,8 @@ from django.utils.encoding import force_bytes,force_text,DjangoUnicodeDecodeErro
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from six import text_type
+from django.utils.six import text_type
+
 
 
 
@@ -73,8 +74,8 @@ def get_vertification_link(userobj):
     
     
     #AMMEND THIS set your domain Since it a helper method there is no request 
-    #domain = "localhost:8000"
-    domain = "https://ntuseproj.herokuapp.com/"
+    domain = "localhost:8000"
+    #domain = "https://ntuseproj.herokuapp.com/"
 
 
     link=reverse('activate',kwargs={'uidb64':uidb64 ,'token':  token_generator.make_token(userobj)})
