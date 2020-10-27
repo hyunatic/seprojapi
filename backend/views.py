@@ -23,12 +23,13 @@ from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import getUsernameSeralizer
-from .serializer import ViewItemSeralizer
+
+
 from .serializer import PostItemSeralizer
 from .serializer import DeleteItemSeralizer
 from .serializer import SearchdetailSeralizer
 from .serializer import searchItemSeralizer
-
+from .serializer import ViewUserItemSeralizer
 from .serializer import MakeOrderSeralizer
 from .models import Post ,Order ,Profile
 from .Verifyaccount import send_vertification_email;
@@ -118,7 +119,7 @@ def check_emailExist(emailCode):
 
          return 0
 
-# Call  the above 2 are just helper method
+# Call this the above 2 are just helper method
 #get data via JSON 
 @api_view(['POST'] )
 def create_User(request,*args,**kwargs):
@@ -172,12 +173,11 @@ def create_User(request,*args,**kwargs):
 @api_view(['GET'])
 def list_view(request,*args ,**kwargs):
     #Do not get the Administrator Post Item  
-    qs = User.objects.filter(~Q(id = 1))
-    seralizer = ViewItemSeralizer(qs, many=True)
+
 
     #Another way
-    # qs = Post.objects.all().order_by('Userid')
-    # seralizer = searchItemSeralizer(qs,many=True)
+    qs = Post.objects.all().order_by('Userid')
+    seralizer = searchItemSeralizer(qs,many=True)
     
 
     return Response(seralizer.data ,status=200)
@@ -192,60 +192,78 @@ def list_view(request,*args ,**kwargs):
 def list_user_view(request ,*args ,**kwargs):
 
 
-    list_user_seralizer = ViewItemSeralizer(data=request.data)
+    list_user_seralizer = ViewUserItemSeralizer(data=request.data)
+    qs=None 
     try:
         userarg = list_user_seralizer.getusername(request.data)
         userobj = User.objects.get(username=userarg)
+        qs = Post.objects.filter(Userid=userobj.pk).order_by("PostDate")
     except:
         return Response({"Result": "Username not found"}, status=500) 
-    qs = User.objects.filter(pk=userobj.pk)
-
+    #qs = User.objects.filter(pk=userobj.pk)
+   
     #set Many to true to return many value
-    seralizer = ViewItemSeralizer(qs, many=True)
+    seralizer = searchItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
 
 
 #JSON format
 # {
-# "searchType": "Item_Name/Category/Hall",
-# "searchArg" : "XXXXXX"
+# "searchType": "ItemName/Category/Hall",
+# "searchArg" : "XXXXXX",
+#"searchOrd": "ASC,DESC"
 # }
-
+#ASC=  Oldest First #DESC is latest 
 #Another way to define .. this is call class based vieW
 class search_post_Item(APIView ):
     #if the API is a POST request
     def post(self,request,format=None):
         search_post_item_seralizer = SearchdetailSeralizer()
+
         searchType = search_post_item_seralizer.getSearchType(request.data)
         searchArg = search_post_item_seralizer.getSearchArg(request.data)
+        searchOrder = search_post_item_seralizer.getSearchOrder(request.data)
+
         qs= None
 
-        if searchType=="ItemName":
-            
-            #there should be  a better way
-            qs=Post.objects.filter(ItemName__icontains=searchArg) 
-
-            seralizer =searchItemSeralizer(qs,many=True)
-            
-            return Response(seralizer.data ,status=200)
-
-
-        elif searchType =="Category":
-
-            qs =Post.objects.filter(Category__iexact=searchArg) 
-            seralizer =searchItemSeralizer(qs,many=True)
-            return Response(seralizer.data ,status=200)
-
-        elif searchType =='Hall':
-        #Hallobj = Profile.objects.get(Hall=searchArg)
-            
-           # keep thing simiple RAW SQL
-            qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s",[searchArg])
-            seralizer=searchItemSeralizer(qs,many=True)
-            return Response(seralizer.data ,status=200)
+        if searchOrder == "ASC":
+             if searchType=="ItemName":
+                    qs=Post.objects.filter(ItemName__icontains=searchArg).order_by("PostDate")
+                    seralizer =searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
+             elif  searchType =="Category":
+                    qs =Post.objects.filter(Category__iexact=searchArg).order_by("PostDate")
+                    seralizer =searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
+             elif searchType =="Hall":
+                    #Hallobj = Profile.objects.get(Hall=searchArg)
+                    # keep thing simiple RAW SQL
+                    qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s ORDER BY PostDate",[searchArg])
+                    seralizer=searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
+                 
+        elif searchOrder == "DESC" :
+             if searchType=="ItemName":
+                    qs=Post.objects.filter(ItemName__icontains=searchArg).order_by("-PostDate")
+                    seralizer =searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
+             elif  searchType =="Category":
+                    qs =Post.objects.filter(Category__iexact=searchArg).order_by("-PostDate") 
+                    seralizer =searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
+             elif searchType =="Hall":
+                    #Hallobj = Profile.objects.get(Hall=searchArg)
+                    # keep thing simiple RAW SQL
+                    qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s ORDER BY PostDate DESC",[searchArg])
+                    seralizer=searchItemSeralizer(qs,many=True)
+                    return Response(seralizer.data ,status=200)
 
 
         return Response({"Result": -1}, status=500) 
+        
+
+
+  
 
 
     def get(self,request,format=None):
