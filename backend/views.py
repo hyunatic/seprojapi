@@ -30,10 +30,15 @@ from .serializer import PostItemSeralizer
 from .serializer import DeleteItemSeralizer
 from .serializer import SearchdetailSeralizer
 from .serializer import searchItemSeralizer
-from .serializer import ViewUserItemSeralizer
+from .serializer import get_detailViewUserItemSeralizer
+from .serializer import ViewItemSeralizer
+
+
+
 from .serializer import MakeOrderSeralizer
 from .models import Post ,Order ,Profile
 from .Verifyaccount import send_vertification_email;
+from .OrderNotification import send_OrderMake_email
 
 #Administrator password is Unwanted1
 #user2 password is         Unwanted2
@@ -183,9 +188,10 @@ def create_User(request,*args,**kwargs):
 def list_view(request,*args ,**kwargs):
     #Do not get the Administrator Post Item  
 
-
+    order_confirm = Order.objects.filter(OrderConfirm=1).values_list('Postid_id')
+    qs = Post.objects.filter(~Q(pk__in = order_confirm))
     #Another way
-    qs = Post.objects.all().order_by('Userid')
+    #qs = Post.objects.all().order_by('Userid')
     seralizer = searchItemSeralizer(qs,many=True)
     
 
@@ -201,21 +207,26 @@ def list_view(request,*args ,**kwargs):
 def list_user_view(request ,*args ,**kwargs):
 
 
-    list_user_seralizer = ViewUserItemSeralizer(data=request.data)
+    list_user_seralizer = get_detailViewUserItemSeralizer(data=request.data)
     qs=None 
     try:
+        #get the username from JSON
         userarg = list_user_seralizer.getusername(request.data)
         userobj = User.objects.get(username=userarg)
+
         qs = Post.objects.filter(Userid=userobj.pk).order_by("PostDate")
+
+
     except:
         return Response({"Result": "Username not found"}, status=500) 
     #qs = User.objects.filter(pk=userobj.pk)
    
     #set Many to true to return many value
-    seralizer = searchItemSeralizer(qs, many=True)
+    seralizer = ViewItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
 
 
+#Another way to define .. this is call class based vieW
 #JSON format
 # {
 # "searchType": "ItemName/Category/Hall",
@@ -223,7 +234,6 @@ def list_user_view(request ,*args ,**kwargs):
 #"searchOrd": "ASC,DESC"
 # }
 #ASC=  Oldest First #DESC is latest 
-#Another way to define .. this is call class based vieW
 class search_post_Item(APIView ):
     #if the API is a POST request
     def post(self,request,format=None):
@@ -281,8 +291,7 @@ class search_post_Item(APIView ):
 
 
 #JSON format to POST Item
-#postid is the post 
-
+#postid is the an auto generated the POST Number
 #Due to the model of Post and aut_user had a Many to  1 relation 
 #the model.seralizer need an User instance in that the case just pass in 1 which is the UID of the administrator
 #  {
@@ -332,37 +341,51 @@ def DeleteItem(request,*args, **kwargs):
 
 
 #-------------------------------------------CRUD Order table -------------------------------
-#JSON format to POST Item
+#JSON format to POST Item same as it is ref to user object you will need req_Userid
 #Userid just leave it 1 
 
-#Due to the model of Order and aut_user had a Many to  1 relation 
-#and Order to Post therefore Please follow the syntax case senstive
-#Postid is the postid of the item
-#userid Leave it at 1
 #Date format is YYYY-MM-DD"
 #Time hr:mm
 #movingService True or False
-#  {
-#     "Postid":5,
-#     "Userid":1,
-#     "username": "user2",
-#     "Date":"2020-12-10",
-#     "Time":"20:20",
-#     "location":"Sing",
-#     "movingService":"False/True"
-#  }
 
-@api_view(['POST','GET'] )
+#JSON FORMAT
+
+#  {
+#     "Postid":"8",
+#     "req_Userid":"1",
+#     "req_username": "user3",
+#     "Date":"2020-10-10",
+#     "Time":"20:20",
+#     "Location":"Sing",
+#     "MovingService":"False"
+#  }
+@api_view(['POST'] )
 def makeOrder(request,*args, **kwargs):
 
     create_order_seralizer = MakeOrderSeralizer(data=request.data)
 
+    requsercode = create_order_seralizer.getUsername(request.data)
+    postcode = create_order_seralizer.getPostid(request.data)
+
     if create_order_seralizer.is_valid(raise_exception=True):
+        
         #create_user_seralizer.save(is_active='False')
-        result_value=create_order_seralizer.makeOrder(request.data)
+        
+        
+        result_value= create_order_seralizer.makeOrder(request.data)
         data= {
         "Result": result_value
         }
+
+        if(result_value ==1):
+            #try:
+                send_OrderMake_email(requsercode,postcode) 
+            #except:
+                #if email FAILED For some funny reason 
+                #return Response({"Result": -1}, status=500) 
+           
+
+
     return Response(data, status=200) 
 
 
