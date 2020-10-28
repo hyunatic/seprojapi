@@ -54,10 +54,7 @@ class DeleteItemSeralizer(serializers.ModelSerializer):
 
 
 
-        
-
-
-class ViewUserItemSeralizer(serializers.ModelSerializer):
+class get_detailViewUserItemSeralizer(serializers.ModelSerializer):
 
     class Meta:
         model=User
@@ -66,6 +63,38 @@ class ViewUserItemSeralizer(serializers.ModelSerializer):
         return vaildatedata['username']
 
 
+class ViewItemSeralizer(serializers.ModelSerializer):
+    Username = serializers.SerializerMethodField('get_username',read_only=True)
+    Email = serializers.SerializerMethodField('get_email',read_only=True)
+    Hall = serializers.SerializerMethodField('get_hall',read_only=True)
+    Order_confirm = serializers.SerializerMethodField('get_ord_con', read_only=True)
+
+
+    class Meta:
+        model=Post
+        fields=('Postid','Username','ItemName','Email' ,'Category','Description','PostDate','ImageId','Hall','Order_confirm')
+    
+    
+    def get_ord_con(self,obj):
+        try:
+            orobj = Order.objects.get(Postid= obj.Postid)
+            return orobj.OrderConfirm
+            #if the object does not exits
+        except Order.DoesNotExist:
+            return False 
+
+        
+
+
+    def get_username(self,obj):
+        return str(obj.Userid.username)
+
+    def get_hall(self,obj):
+        userobj = Profile.objects.get(Userid=obj.Userid)
+        return userobj.Hall
+    def get_email(self,obj):
+       
+        return obj.Userid.email 
 
 
 class searchItemSeralizer(serializers.ModelSerializer):
@@ -117,18 +146,28 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
         model =Order
         fields='__all__'
 
-    def makeOrder(self,validate_data):
+    def getUsername(self,vaildated_data):
+
+        return vaildated_data['req_username']
+
+    def getPostid(self,validate_data):
+        return validate_data['Postid']
+
+    def makeOrder(self,validate_data ):
         #try:
             #get the username
-            userobj = User.objects.get(username=validate_data['username'])
+            userobj = User.objects.get(username=validate_data['req_username'])
             postobj = Post.objects.get(pk=validate_data['Postid'])
-            
-            orderobj = Order(Postid=postobj,Userid=userobj,Date=validate_data['Date'],Time=validate_data['Time'],Location=validate_data['location'],MovingService=validate_data['movingService'])        
+           
+            orderobj = Order(Postid=postobj,req_Userid=userobj,Date=validate_data['Date'],Time=validate_data['Time'],Location=validate_data['Location'],
+            MovingService=validate_data['MovingService'])        
             orderobj.OrderConfirm=False
             orderobj.save()
             return 1 
        # except:
         #    return 0
+
+
 
 
 class ApproveOrderSeralizer(serializers.ModelSerializer):
@@ -141,13 +180,6 @@ class ApproveOrderSeralizer(serializers.ModelSerializer):
         #But most likely I use try and except If I can`t
         #then i delete it 
         return None 
-
-# We need to query these and maybe store inside the object
-class ViewOrderSeralizer(serializers.ModelSerializer):
-    class Meta:
-        model=Order
-        fields='__all__'
-
 
 class DeleteOrderSeralizer(serializers.ModelSerializer):
     class Meta:
