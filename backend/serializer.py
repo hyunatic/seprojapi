@@ -29,7 +29,7 @@ class PostItemSeralizer(serializers.ModelSerializer):
         userobj = User.objects.get(username=validated_data['username'])
         #profileobj =Profile.objects.get(Userid=userobj.pk)
         #print(uid)
-        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],postDate=validated_data['postDate'],ImageId=validated_data['ImageId'])
+        postobj = Post( Userid=userobj ,ItemName=validated_data['ItemName'],Category=validated_data['Category'],Description=validated_data['Description'],postDate=validated_data['PostDate'],ImageId=validated_data['ImageId'])
         postobj.save()
         
         try:
