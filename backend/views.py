@@ -22,7 +22,7 @@ from rest_framework.views import APIView
 from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
-from .serializer import getUsernameSeralizer
+
 from .serializer import SuccessLoginSeralizer
 
 
@@ -46,24 +46,6 @@ from .OrderNotification import send_OrderMake_email
 
 #If not mention 0 mean API failed 1 mean API Pass 
 
-# To get the username base on the userid 
-#Since my list_view return the UID 
-#JSON Syntax 
-# {
-# 
-#  "Userid":2
-# }
-@api_view(['POST'] )
-def get_username(request,*args, **kwargs):
-    get_username_seralizer = getUsernameSeralizer()
-    uid = get_username_seralizer.get_id(request.data)
-    userobj = User.objects.get(pk=uid)
-    
-    data={
-        "Result": userobj.username
-    }
-
-    return Response(data,status=200)
 
 
 
@@ -242,39 +224,40 @@ class search_post_Item(APIView ):
         searchType = search_post_item_seralizer.getSearchType(request.data)
         searchArg = search_post_item_seralizer.getSearchArg(request.data)
         searchOrder = search_post_item_seralizer.getSearchOrder(request.data)
-
+        order_confirm = Order.objects.filter(OrderConfirm=1).values_list('Postid_id')
         qs= None
 
         if searchOrder == "ASC":
              if searchType=="ItemName":
-                    qs=Post.objects.filter(ItemName__icontains=searchArg).order_by("PostDate")
+                    qs=Post.objects.filter(Q(ItemName__icontains=searchArg) &  ~Q(pk__in = order_confirm) ).order_by("PostDate")
                     seralizer =SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
              elif  searchType =="Category":
-                    qs =Post.objects.filter(Category__iexact=searchArg).order_by("PostDate")
+                    qs =Post.objects.filter( Q(Category__iexact=searchArg) & ~Q(pk__in = order_confirm)).order_by("PostDate")
                     seralizer =SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
              elif searchType =="Hall":
                     #Hallobj = Profile.objects.get(Hall=searchArg)
-                    # keep thing simiple RAW SQL
-                    qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s ORDER BY PostDate",[searchArg])
+                    inthat_hall = Profile.objects.filter(Hall=searchArg).values_list('Userid_id')
+                    qs=Post.objects.filter(  Q(Userid__in = inthat_hall) &  ~Q(pk__in = order_confirm)  ).order_by("PostDate")
                     seralizer=SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
                  
         elif searchOrder == "DESC" :
              if searchType=="ItemName":
-                    qs=Post.objects.filter(ItemName__icontains=searchArg).order_by("-PostDate")
+                    qs=Post.objects.filter(Q(ItemName__icontains=searchArg) &  ~Q(pk__in = order_confirm)).order_by("-PostDate")
                     seralizer =SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
              elif  searchType =="Category":
-                    qs =Post.objects.filter(Category__iexact=searchArg).order_by("-PostDate") 
+                    qs =Post.objects.filter(Q(Category__iexact=searchArg) & ~Q(pk__in = order_confirm)).order_by("-PostDate") 
                     seralizer =SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
              elif searchType =="Hall":
                     #Hallobj = Profile.objects.get(Hall=searchArg)
-                    # keep thing simiple RAW SQL
-                    qs= Post.objects.raw("SELECT * FROM Post as p INNER JOIN auth_user as u on p.Userid_id=u.id INNER JOIN Profile as pro on P.Userid_id= pro.Userid_id WHERE Hall=%s ORDER BY PostDate DESC",[searchArg])
-                    seralizer=searchItemSeralizer(qs,many=True)
+                  
+                    inthat_hall = Profile.objects.filter(Hall=searchArg).values_list('Userid_id')
+                    qs=Post.objects.filter(  Q(Userid__in = inthat_hall) &  ~Q(pk__in = order_confirm)  ).order_by("-PostDate")
+                    seralizer=SearchItemSeralizer(qs,many=True)
                     return Response(seralizer.data ,status=200)
 
 
