@@ -97,7 +97,7 @@ class ViewItemSeralizer(serializers.ModelSerializer):
         return obj.Userid.email 
 
 
-class searchItemSeralizer(serializers.ModelSerializer):
+class SearchItemSeralizer(serializers.ModelSerializer):
     Username = serializers.SerializerMethodField('get_username',read_only=True)
     Email = serializers.SerializerMethodField('get_email',read_only=True)
     Hall = serializers.SerializerMethodField('get_hall',read_only=True)
@@ -118,7 +118,7 @@ class searchItemSeralizer(serializers.ModelSerializer):
        
         return obj.Userid.email 
 
-class SearchdetailSeralizer(serializers.Serializer):
+class get_SearchdetailSeralizer(serializers.Serializer):
 
 
     searchType = serializers.CharField(max_length=50)
