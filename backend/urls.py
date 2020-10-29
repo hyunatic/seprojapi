@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path 
 from backend import views
-from backend import Verifyaccount 
+from backend import Verifyaccount
 
 urlpatterns = [
 
@@ -29,13 +29,14 @@ urlpatterns = [
     path('activate/<uidb64>/<token>',Verifyaccount.VertificationView.as_view(),name="activate"),
     path('api/create_User', views.create_User),
     path('api/check_Login',views.login),
-    path('api/get_Username',views.get_username),
+
 
     #For Post
     path('api/view_Item',views.list_view),
     path('api/view_User_Item',views.list_user_view),
-    path('api/search_Item',views.search_post_Item),
+    path('api/search_Item',views.search_post_Item.as_view(),name="search_post_Item"),
     path('api/post_Item',views.postItem),
+    path('api/update_Item',views.updateItem),
     path('api/delete_Item',views.DeleteItem),
      
     #For Order
