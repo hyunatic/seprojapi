@@ -41,7 +41,7 @@ class PostItemSeralizer(serializers.ModelSerializer):
 class DeleteItemSeralizer(serializers.ModelSerializer):
     class Meta:
         model =Post
-        fields='__all__'
+        fields=('Postid')
 
 
     def DeletePost(self,validated_data):
@@ -51,6 +51,23 @@ class DeleteItemSeralizer(serializers.ModelSerializer):
             return 1
         except:
             return 0 
+
+
+class UpdateItemSeralizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields=('Postid','ItemName','Description','PostDate')
+    
+    def updatePost(Self,validated_data):
+        postobj= Post.objects.get(pk=validated_data['Postid'])
+
+        postobj.ItemName = validated_data['ItemName']
+        postobj.Description = validated_data['Description']
+        postobj.PostDate = validated_data['PostDate']
+        postobj.save()
+        return 1 
+
 
 
 
@@ -170,16 +187,82 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
 
 
 
-class ApproveOrderSeralizer(serializers.ModelSerializer):
+class get_usernameserializer(serializers.Serializer):
+
+
+    username = serializers.CharField(max_length=50)
+
+    class meta:
+        fields=('username')
+    
+        
+    def getUsername(self,vaildated_data):
+
+        return vaildated_data['username']
+
+
+class View_SenderOrderSeralizer(serializers.ModelSerializer):
+    req_username = serializers.SerializerMethodField('get_username',read_only=True)
+    ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
+
     class Meta:
         model =Order
-        fields='__all__'
-    def approveOrder(self,validate_data):
-        #get the object base on OID
-        #I can do a second level check 
-        #But most likely I use try and except If I can`t
-        #then i delete it 
-        return None 
+        fields=('OrderId', 'ItemName' , 'req_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+
+    def get_username(self,orderobj):
+        
+        return str(orderobj.req_Userid.username)
+
+    def get_Itemname(self,orderobj):
+     
+        return str(orderobj.Postid.ItemName)
+
+
+
+
+class View_reqOrderSeralizer(serializers.ModelSerializer):
+    from_username = serializers.SerializerMethodField('get_username',read_only=True)
+    ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
+
+    class Meta:
+        model =Order
+        fields=('OrderId', 'ItemName' , 'from_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+
+    def get_username(self,orderobj):
+        
+        return str(orderobj.Postid.Userid.username)
+
+    def get_Itemname(self,orderobj):
+     
+        return str(orderobj.Postid.ItemName)
+
+
+
+class Approve_Disapprove_OrderSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model =Order
+        fields=['OrderId']
+    
+    def getdecision(self,validate_data):
+        return validate_data['OrderConfirm']
+
+    def getorderID(self,validate_data):
+        return validate_data['OrderId']
+
+    def implementdecision (self,validate_data ,descision):
+        
+        if(descision == 'False'):
+            Orderobj = Order.objects.get(pk=validate_data['OrderId'])
+            Orderobj.delete()
+            return -1
+        elif (descision == 'True'):
+            Orderobj = Order.objects.get(pk=validate_data['OrderId'])
+            Orderobj.OrderConfirm= True
+            Orderobj.save()
+
+            return 1
+
+
 
 class DeleteOrderSeralizer(serializers.ModelSerializer):
     class Meta:
@@ -195,15 +278,11 @@ class DeleteOrderSeralizer(serializers.ModelSerializer):
 
 
 
+
+
 #---------------------------- USER ACCOUNT Seralizer ------------------------------------------------------------------------------
 
 
-class getUsernameSeralizer(serializers.ModelSerializer):
-    class Meta:
-        model =User
-        fields=('id')   
-    def get_id(self,value):
-        return value['Userid']
 
 class LoginUserSeralizer(serializers.ModelSerializer):
     class Meta:
@@ -257,6 +336,14 @@ class CreateUserSerailizer(serializers.ModelSerializer):
         return user
 
 
+
+# EXTRA API that is not needed
+# class getUsernameSeralizer(serializers.ModelSerializer):
+#     class Meta:
+#         model =User
+#         fields=('id')   
+#     def get_id(self,value):
+#         return value['Userid']
 
 
 #---------------------------------------- ref code ------------------------------------------------
