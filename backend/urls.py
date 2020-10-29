@@ -41,6 +41,9 @@ urlpatterns = [
      
     #For Order
     path('api/make_Order',views.makeOrder),
+    path('api/view_Order2approve',views.listOrder_2approve),
+    path('api/view_Order',views.listOrder_makebyU),
+    path('api/Order_decision',views.order_decision)
 
    
 ]
