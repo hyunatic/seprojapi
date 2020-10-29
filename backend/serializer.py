@@ -267,14 +267,14 @@ class Approve_Disapprove_OrderSeralizer(serializers.ModelSerializer):
 class DeleteOrderSeralizer(serializers.ModelSerializer):
     class Meta:
         model =Order
-        fields='__all__'
+        fields=['OrderId']
         #Need see how to picture it 
         #'__all__'
     
     def DeleteOrder(self,validated_data):
-        #name = Post()
-        #name.save()
-        return None
+        Orderobj = Order.objects.get(pk=validated_data['OrderId'])
+        Orderobj.delete()
+        return 1
 
 
 
