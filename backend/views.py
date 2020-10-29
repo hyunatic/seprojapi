@@ -4,10 +4,7 @@
 from django.shortcuts import render ,redirect
 from django.http import HttpResponse,JsonResponse
 
-# for not equals 
-from django.db.models import Q 
 
-from django.contrib.auth.models import User 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings  #Import your setting from Django
 
@@ -39,9 +36,12 @@ from .serializer import get_usernameserializer
 from .serializer import View_SenderOrderSeralizer
 from .serializer import View_reqOrderSeralizer
 from .serializer import Approve_Disapprove_OrderSeralizer
+from .serializer import DeleteOrderSeralizer
 
 
 from .models import Post ,Order ,Profile
+from django.contrib.auth.models import User 
+from django.db.models import Q  # For Query
 from .Verifyaccount import send_vertification_email;
 from .OrderNotification import send_OrderMake_email ,send_OrderOutcome
 
@@ -340,7 +340,7 @@ def updateItem(request,*args, **kwargs):
 #}
 
 @api_view(['POST','GET'] )
-def DeleteItem(request,*args, **kwargs):
+def deleteItem(request,*args, **kwargs):
     Delete_post_seralizer = DeleteItemSeralizer()
     resultvalue = Delete_post_seralizer.DeletePost(request.data)
  
@@ -443,7 +443,7 @@ def listOrder_2approve(request,*args,**kwargs):
 #JSON FORMAT
 # {
 
-# "Orderid": "X",
+# "OrderId": "X",
 # "OrderConfirm": True/False
 
 # }
@@ -502,7 +502,21 @@ def listOrder_makebyU(request,*args,**kwargs):
     return Response(seralizer.data ,status=200)
 
 
+#JSON FORMAT
+# {
+# "OrderId": X
+# }
+@api_view(['POST'] )
+def deleteOrder(request,*args, **kwargs):
 
+    Delete_order_seralizer = DeleteOrderSeralizer()
+    resultvalue = Delete_order_seralizer.DeleteOrder(request.data)
+ 
+    
+    data= {
+    "Result": resultvalue
+    }
+    return Response(data, status=200) 
 
 
 
