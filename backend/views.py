@@ -34,12 +34,19 @@ from .serializer import get_detailViewUserItemSeralizer
 from .serializer import ViewItemSeralizer
 
 
-
 from .serializer import MakeOrderSeralizer
+from .serializer import get_usernameserializer
+from .serializer import View_SenderOrderSeralizer
+from .serializer import View_reqOrderSeralizer
+from .serializer import Approve_Disapprove_OrderSeralizer
+
+
 from .models import Post ,Order ,Profile
 from .Verifyaccount import send_vertification_email;
-from .OrderNotification import send_OrderMake_email
+from .OrderNotification import send_OrderMake_email ,send_OrderOutcome
 
+
+#  List of the dummy account.
 #Administrator password is Unwanted1
 #user2 password is         Unwanted2
 #user3 password is         Unwanted3
@@ -47,10 +54,10 @@ from .OrderNotification import send_OrderMake_email
 #If not mention 0 mean API failed 1 mean API Pass 
 
 
+# the URL is at url.py 
 
 
-
-#Login APi the URL is at url.py 
+#Login APi 
 #Check the login get data via the URL
 #0= login fail  1=Pass
 #JSON Syntax 
@@ -79,8 +86,6 @@ def login(request,*args,   **kwargs):
             "Result": resultvalue
      }
     return Response(data, status=200) 
-
-
 
 
 
@@ -161,10 +166,7 @@ def create_User(request,*args,**kwargs):
 
 
 
-
-
-
-#-----------------------------------------  CRUD Product Table-------------------------------------------------
+#-----------------------------------------  CRUD Post  Table-------------------------------------------------
 
 @api_view(['GET'])
 def list_view(request,*args ,**kwargs):
@@ -330,8 +332,6 @@ def updateItem(request,*args, **kwargs):
 
 
 
-
-
 #use this with list_user_view
 
 #JSON FORMAT
@@ -360,6 +360,7 @@ def DeleteItem(request,*args, **kwargs):
 #Date format is YYYY-MM-DD"
 #Time hr:mm
 #movingService True or False
+#req_username refer to the USER THAT IS REQUESTING THE ITEM
 
 #JSON FORMAT
 
@@ -400,6 +401,106 @@ def makeOrder(request,*args, **kwargs):
 
 
     return Response(data, status=200) 
+
+
+
+
+#This method will list all order that await the user to approve
+# user2 refer to the order wait User2 to approve
+
+#JSON FORMAT
+# {
+# "username": "user2"
+# }
+@api_view(['POST'] )
+def listOrder_2approve(request,*args,**kwargs):
+
+    #get the username out of JSON
+    get_username_serializer = get_usernameserializer()
+    usercode = get_username_serializer.getUsername(request.data)
+
+
+    #get the user objectname
+    userobject = User.objects.get(username=usercode)
+
+
+    #get thoose postID that belong to this user
+    user_post = Post.objects.filter(Userid=userobject.pk).values_list('Postid')
+
+
+    #Filter out thoose order make by this user
+    qs =Order.objects.filter( Q (Postid__in = user_post) )
+
+    seralizer = View_SenderOrderSeralizer(qs,many=True)
+    
+
+    return Response(seralizer.data ,status=200)
+
+
+
+#This method will handle approve or Disapprove 
+# 1 = Approve 0 = ERROR  -1 = Disapprove Order will be delete and email will be send 
+#JSON FORMAT
+# {
+
+# "Orderid": "X",
+# "OrderConfirm": True/False
+
+# }
+
+@api_view(['POST'] )
+def order_decision(request,*args,**kwargs):
+
+    order_desc_serializer = Approve_Disapprove_OrderSeralizer()
+
+    #get the descsion and the orderID
+    decision = order_desc_serializer.getdecision(request.data)
+    orderid = order_desc_serializer.getorderID(request.data)
+
+    #get the order object so we can get the user object ( Using it to send email notifiation)
+    orderobj = Order.objects.get(pk=orderid)
+    usercode = orderobj.req_Userid.username
+
+    result_value = order_desc_serializer.implementdecision(request.data ,decision)
+    outcome= "Approved"
+    data= {
+        "Result": result_value
+    }
+
+
+    if(result_value == -1):
+        outcome= "Refused"
+    elif (result_value == 0):
+         return Response(data, status=200) 
+
+    send_OrderOutcome(usercode,orderid,outcome)
+    return Response(data, status=200) 
+
+
+#Get all order make by you
+#JSON FORMAT
+# {
+# "username": "user2"
+# }
+@api_view(['POST'] )
+def listOrder_makebyU(request,*args,**kwargs):
+
+    #get the username out of JSON
+    get_username_serializer = get_usernameserializer()
+    requserCode = get_username_serializer.getUsername(request.data)
+
+
+    #get the user objectname
+    userobject = User.objects.get(username=requserCode)
+
+    #Filter out thoose order make by the user
+    qs =Order.objects.filter( req_Userid=userobject.pk)
+
+    seralizer = View_reqOrderSeralizer(qs,many=True)
+    
+
+    return Response(seralizer.data ,status=200)
+
 
 
 
