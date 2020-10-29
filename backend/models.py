@@ -2,7 +2,7 @@ from django.db import models
 #taken from the website 
 from django.conf import settings 
 from django.contrib.auth.models import User
-
+from datetime import datetime
 
 
 
@@ -21,6 +21,7 @@ class Profile(models.Model):
     
     class Meta:
         db_table='Profile'
+        managed=False
 
 #This is your database Schema or MAP TO YOUR SQL
 #Content is the column therefore 
@@ -36,20 +37,24 @@ class Post(models.Model):
 
     class Meta:
         db_table='Post'
+        managed=False
 
 
 class Order(models.Model):
     OrderId = models.AutoField(primary_key=True)
-    Postid = models.ForeignKey(Post,on_delete=models.CASCADE)
-    req_Userid = models.ForeignKey(User,on_delete=models.CASCADE)
-    Date = models.DateField()
+    Postid = models.ForeignKey(Post,on_delete=models.DO_NOTHING)
+    req_Userid = models.ForeignKey(User,on_delete=models.DO_NOTHING )
+    Date = models.DateField(default=datetime.now)
     Time = models.TimeField()
-    Location = models.TextField(default='')
+    Location = models.TextField()
     MovingService = models.BooleanField(default=False)
     OrderConfirm = models.BooleanField(default=False)
 
     class Meta:
         db_table='Order'
+        #it will auto acreate the table field for me ... # this was set to true due to previous manual configuration for
+        #order had some issues with searlizer.
+        managed=True
 
 
 
