@@ -11,7 +11,7 @@ from django.views import View
 from django.core.mail import send_mail
 
 
-
+# When an Order had been make 
 def send_OrderMake_email( req_username ,postarg):
     #get the domain name of where our website store at 
     
@@ -30,4 +30,19 @@ def send_OrderMake_email( req_username ,postarg):
 
     )
 
-    #print("The email address is " , email_addr)
+
+def send_OrderOutcome(usercode ,OID,outcome):
+    
+    userobj = User.objects.get(username=usercode)
+   
+    
+    message="Hi " + userobj.username +"\n" +"This is to inform you that your Order ID " + str(OID) + " had been " + outcome +  ".\n Regards"
+    send_mail(
+        'Your Order had been ' + outcome +'!',
+         message,
+         None,  #derived from default_from_email in settings.py
+        [userobj.email],
+        fail_silently=False
+
+    )
+
