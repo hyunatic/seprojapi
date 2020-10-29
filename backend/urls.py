@@ -37,13 +37,15 @@ urlpatterns = [
     path('api/search_Item',views.search_post_Item.as_view(),name="search_post_Item"),
     path('api/post_Item',views.postItem),
     path('api/update_Item',views.updateItem),
-    path('api/delete_Item',views.DeleteItem),
+    path('api/delete_Item',views.deleteItem),
      
     #For Order
     path('api/make_Order',views.makeOrder),
     path('api/view_Order2approve',views.listOrder_2approve),
     path('api/view_Order',views.listOrder_makebyU),
+     path('api/delete_Order',views.deleteOrder),
     path('api/Order_decision',views.order_decision)
+   
 
    
 ]
