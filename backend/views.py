@@ -22,11 +22,11 @@ from rest_framework.views import APIView
 from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
-
 from .serializer import SuccessLoginSeralizer
 
 
 from .serializer import PostItemSeralizer
+from .serializer import UpdateItemSeralizer
 from .serializer import DeleteItemSeralizer
 from .serializer import get_SearchdetailSeralizer
 from .serializer import SearchItemSeralizer
@@ -283,7 +283,7 @@ class search_post_Item(APIView ):
 #    "ItemName":"Apple2",
 #    "Category":"Iphone",
 #    "Description":"NOT 4 SALE",
-#    "postDate":"2020-10-10",
+#    "PostDate":"2020-10-10",
 #    "ImageId": "Apple"
 #   }
 
@@ -299,6 +299,36 @@ def postItem(request,*args, **kwargs):
         "Result": result_value
         }
     return Response(data, status=200) 
+
+
+#JSON SYNTAX
+# Format is YYY-MM-DD
+# {
+#   "Postid": 3,
+#   "ItemName": "Apple20",
+#   "Description": "PLEASE TAKE",
+#   "PostDate": "2025-12-01"
+# }
+ 
+ 
+
+
+@api_view(['POST'] )
+def updateItem(request,*args, **kwargs):
+    
+    update_item_seralizer = UpdateItemSeralizer(data=request.data)
+
+    if(update_item_seralizer.is_valid(raise_exception=True)):
+        
+        result_value = update_item_seralizer.updatePost(request.data)
+        data= {
+        "Result": result_value
+        }
+    
+    return Response(data, status=200) 
+
+
+
 
 
 
