@@ -47,6 +47,7 @@ class Order(models.Model):
     Date = models.DateField(default=datetime.now)
     Time = models.TimeField()
     Location = models.TextField()
+    Delivery_status = models.TextField(default="Preparing")
     MovingService = models.BooleanField(default=False)
     OrderConfirm = models.BooleanField(default=False)
 
