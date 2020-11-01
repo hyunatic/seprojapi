@@ -127,6 +127,7 @@ class SearchItemSeralizer(serializers.ModelSerializer):
        
         return obj.Userid.email 
 
+
 class get_SearchdetailSeralizer(serializers.Serializer):
 
 
@@ -193,13 +194,17 @@ class get_usernameserializer(serializers.Serializer):
         return vaildated_data['username']
 
 
+
+#Below two seralizer is the same so technically I can just call them straight
+#But I seperate them as Just in case I may need to make some changes that is unique
+#to view Order await your approve and #view order make by you
 class View_SenderOrderSeralizer(serializers.ModelSerializer):
     req_username = serializers.SerializerMethodField('get_username',read_only=True)
     ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
 
     class Meta:
         model =Order
-        fields=('OrderId', 'ItemName' , 'req_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+        fields=('OrderId', 'Postid' ,'ItemName' , 'req_username' ,'Date','Time','Location','MovingService','OrderConfirm')
 
     def get_username(self,orderobj):
         
@@ -210,15 +215,13 @@ class View_SenderOrderSeralizer(serializers.ModelSerializer):
         return str(orderobj.Postid.ItemName)
 
 
-
-
 class View_reqOrderSeralizer(serializers.ModelSerializer):
     from_username = serializers.SerializerMethodField('get_username',read_only=True)
     ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
 
     class Meta:
         model =Order
-        fields=('OrderId', 'ItemName' , 'from_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+        fields=('OrderId','Postid' , 'ItemName' , 'from_username' ,'Date','Time','Location','MovingService','OrderConfirm')
 
     def get_username(self,orderobj):
         
