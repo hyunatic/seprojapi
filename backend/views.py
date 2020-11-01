@@ -193,18 +193,12 @@ def list_user_view(request ,*args ,**kwargs):
 
     list_user_seralizer = get_detailViewUserItemSeralizer(data=request.data)
     qs=None 
-    try:
-        #get the username from JSON
-        userarg = list_user_seralizer.getusername(request.data)
-        userobj = User.objects.get(username=userarg)
 
-        qs = Post.objects.filter(Userid=userobj.pk).order_by("PostDate")
+    userarg = list_user_seralizer.getusername(request.data)
+    userobj = User.objects.filter(username=userarg)
+    qs = Post.objects.filter( Q(Userid__in = userobj)  ).order_by("PostDate")
 
 
-    except:
-        return Response({"Result": "Username not found"}, status=500) 
-    #qs = User.objects.filter(pk=userobj.pk)
-   
     #set Many to true to return many value
     seralizer = ViewItemSeralizer(qs, many=True)
     return Response(seralizer.data ,status=200)
@@ -470,9 +464,22 @@ def order_decision(request,*args,**kwargs):
 
     if(result_value == -1):
         outcome= "Refused"
+
     elif (result_value == 0):
          return Response(data, status=200) 
+    elif (result_value == 1):
+        #Delete and send rejection letter for those order who had request the same item but that item is 
+        #Is approve on another order
+        postobj = orderobj.Postid 
+        rejectOrder = Order.objects.filter( ~Q(pk=orderid)   & Q(Postid=postobj) )
 
+        for x in rejectOrder:
+            print(x.req_Userid.username)
+            send_OrderOutcome(x.req_Userid.username,x.pk,"Refused")
+            x.delete()
+
+
+    
     send_OrderOutcome(usercode,orderid,outcome)
     return Response(data, status=200) 
 
