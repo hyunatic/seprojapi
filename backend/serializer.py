@@ -201,10 +201,11 @@ class get_usernameserializer(serializers.Serializer):
 class View_SenderOrderSeralizer(serializers.ModelSerializer):
     req_username = serializers.SerializerMethodField('get_username',read_only=True)
     ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
+    Itempic =  serializers.SerializerMethodField('get_pic',read_only=True)
 
     class Meta:
         model =Order
-        fields=('OrderId', 'Postid' ,'ItemName' , 'req_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+        fields=('OrderId', 'Postid' ,  'Itempic'  ,'ItemName' , 'req_username' ,'Date','Time','Location','Delivery_status','MovingService','OrderConfirm')
 
     def get_username(self,orderobj):
         
@@ -214,22 +215,26 @@ class View_SenderOrderSeralizer(serializers.ModelSerializer):
      
         return str(orderobj.Postid.ItemName)
 
+    def get_pic(self,orderobj):
+        return orderobj.Postid.ImageId
 
 class View_reqOrderSeralizer(serializers.ModelSerializer):
     from_username = serializers.SerializerMethodField('get_username',read_only=True)
     ItemName = serializers.SerializerMethodField('get_Itemname',read_only=True)
+    Itempic =  serializers.SerializerMethodField('get_pic',read_only=True)
 
     class Meta:
         model =Order
-        fields=('OrderId','Postid' , 'ItemName' , 'from_username' ,'Date','Time','Location','MovingService','OrderConfirm')
+        fields=('OrderId','Postid' , 'ItemName' ,'Itempic', 'from_username' ,'Date','Time','Location', 'Delivery_status' ,'MovingService','OrderConfirm')
 
     def get_username(self,orderobj):
-        
         return str(orderobj.Postid.Userid.username)
 
     def get_Itemname(self,orderobj):
-     
         return str(orderobj.Postid.ItemName)
+
+    def get_pic(self,orderobj):
+        return orderobj.Postid.ImageId
 
 
 
