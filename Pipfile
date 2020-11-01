@@ -6,15 +6,15 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-django = "*"
 django-cors-headers = "*"
-djangorestframework = "*"
-django-utils-six = "*"
+django = "*"
 django-heroku = "*"
+djangorestframework = "*"
 pillow = "*"
+django-six = "*"
 psycopg2 = "*"
 gunicorn = "*"
-django-six = "*"
+django-utils-six = "*"
 
 [requires]
 python_version = "3.8"
