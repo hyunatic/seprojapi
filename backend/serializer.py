@@ -84,21 +84,13 @@ class ViewItemSeralizer(serializers.ModelSerializer):
     Username = serializers.SerializerMethodField('get_username',read_only=True)
     Email = serializers.SerializerMethodField('get_email',read_only=True)
     Hall = serializers.SerializerMethodField('get_hall',read_only=True)
-    Order_confirm = serializers.SerializerMethodField('get_ord_con', read_only=True)
+  
 
 
     class Meta:
         model=Post
-        fields=('Postid','Username','ItemName','Email' ,'Category','Description','PostDate','ImageId','Hall','Order_confirm')
+        fields=('Postid','Username','ItemName','Email' ,'Category','Description','PostDate','ImageId','Hall')
     
-    
-    def get_ord_con(self,obj):
-        try:
-            orobj = Order.objects.get(Postid= obj.Postid)
-            return orobj.OrderConfirm
-            #if the object does not exits
-        except Order.DoesNotExist:
-            return False 
 
         
 
