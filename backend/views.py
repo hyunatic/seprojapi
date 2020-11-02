@@ -11,15 +11,17 @@ from django.conf import settings  #Import your setting from Django
 
 #Import the rest-frame work Library
 from  rest_framework.response import Response
+#One of them is for mine class based view
 from  rest_framework.decorators import api_view  
 from rest_framework.views import APIView
 
 
 
-
+from .Verifyaccount import send_vertification_email
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import SuccessLoginSeralizer
+
 
 
 from .serializer import PostItemSeralizer
@@ -42,7 +44,6 @@ from .serializer import DeleteOrderSeralizer
 from .models import Post ,Order ,Profile
 from django.contrib.auth.models import User 
 from django.db.models import Q  # For Query
-from .Verifyaccount import send_vertification_email
 from .Verifyaccount import send_vertification_email;
 from .OrderNotification import send_OrderMake_email ,send_OrderOutcome
 
@@ -187,6 +188,26 @@ def re_sendVerification(request,*args,**kwargs):
         return Response(data,status=404)
 
 
+#JSON FORMAT
+#Format to follow : CASE SENSETIVE
+# {
+# 	"username": "user2",
+# 	"password": "123",
+# 	"email": "2@2.com",
+#   "Hall": " "
+# }
+@api_view(['POST'] )
+def update_Profile(request,*args,**kwargs):
+    create_user_seralizer = CreateUserSerailizer(data=request.data)
+
+ 
+        #create_user_seralizer.save(is_active='False')
+    resultvalue = create_user_seralizer.updateprofile(request.data)
+    data= {
+            "Result": resultvalue
+    }
+
+    return Response(data,status=404)
 
 
 
@@ -329,9 +350,6 @@ def postItem(request,*args, **kwargs):
 #   "Description": "PLEASE TAKE",
 #   "PostDate": "2025-12-01"
 # }
- 
- 
-
 
 @api_view(['POST'] )
 def updateItem(request,*args, **kwargs):
