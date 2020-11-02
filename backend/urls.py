@@ -20,7 +20,7 @@ from backend import Verifyaccount
 
 urlpatterns = [
 
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
 
 
@@ -28,6 +28,7 @@ urlpatterns = [
     #For User credential
     path('activate/<uidb64>/<token>',Verifyaccount.VertificationView.as_view(),name="activate"),
     path('api/create_User', views.create_User),
+    path('api/resend_verfication', views.re_sendVerification),
     path('api/check_Login',views.login),
 
 
