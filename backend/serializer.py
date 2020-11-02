@@ -164,7 +164,7 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
         return validate_data['Postid']
 
     def makeOrder(self,validate_data ):
-        #try:
+        try:
             #get the username
             userobj = User.objects.get(username=validate_data['req_username'])
             postobj = Post.objects.get(pk=validate_data['Postid'])
@@ -174,8 +174,8 @@ class  MakeOrderSeralizer(serializers.ModelSerializer):
             orderobj.OrderConfirm=False
             orderobj.save()
             return 1 
-       # except:
-        #    return 0
+        except:
+            return 0
 
 
 
@@ -336,14 +336,23 @@ class CreateUserSerailizer(serializers.ModelSerializer):
         return user
 
 
+    def updateprofile(self,validated_data):
+        userobj =User.objects.get(username=validated_data['username'])
+        userobj.set_password(validated_data['password'])
+        userobj.email = validated_data['email']
+        userobj.save()
+        profileobj = Profile.objects.get(Userid=userobj)
+        profileobj.Hall=validated_data['Hall']
+        profileobj.save()
+        return 1
+    
 
-# EXTRA API that is not needed
-# class getUsernameSeralizer(serializers.ModelSerializer):
-#     class Meta:
-#         model =User
-#         fields=('id')   
-#     def get_id(self,value):
-#         return value['Userid']
+
+
+
+
+
+
 
 
 #---------------------------------------- ref code ------------------------------------------------
