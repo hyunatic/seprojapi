@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/create_User', views.create_User),
     path('api/resend_verfication', views.re_sendVerification),
     path('api/check_Login',views.login),
+    path('api/update_User',views.update_Profile),
 
 
     #For Post
