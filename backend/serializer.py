@@ -307,10 +307,14 @@ class LoginUserSeralizer(serializers.ModelSerializer):
 
 
 class SuccessLoginSeralizer(serializers.ModelSerializer):
+    Hall = serializers.SerializerMethodField('get_hall',read_only=True)
     class Meta:
         model = User
-        fields=('username','email')
+        fields=('username','email','Hall')
 
+    def get_hall(self,obj):
+        userobj = Profile.objects.get(Userid=obj.pk)
+        return userobj.Hall
 
 class CreateUserSerailizer(serializers.ModelSerializer):
 
