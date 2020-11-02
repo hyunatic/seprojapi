@@ -338,7 +338,10 @@ class CreateUserSerailizer(serializers.ModelSerializer):
 
     def updateprofile(self,validated_data):
         userobj =User.objects.get(username=validated_data['username'])
-        userobj.set_password(validated_data['password'])
+        if(validated_data['password'] != "None"):
+            userobj.set_password(validated_data['password'])
+        
+        
         userobj.email = validated_data['email']
         userobj.save()
         profileobj = Profile.objects.get(Userid=userobj)
