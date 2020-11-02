@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 
 
 
-from .Verifyaccount import send_vertification_email
+
 from .serializer import CreateUserSerailizer
 from .serializer import LoginUserSeralizer
 from .serializer import SuccessLoginSeralizer
@@ -42,6 +42,7 @@ from .serializer import DeleteOrderSeralizer
 from .models import Post ,Order ,Profile
 from django.contrib.auth.models import User 
 from django.db.models import Q  # For Query
+from .Verifyaccount import send_vertification_email
 from .Verifyaccount import send_vertification_email;
 from .OrderNotification import send_OrderMake_email ,send_OrderOutcome
 
@@ -160,8 +161,31 @@ def create_User(request,*args,**kwargs):
                 return Response({"Result": -1}, status=500) 
 
         return Response({"Result": 0}, status=500) 
-           
-     
+
+
+
+#To -resend the verficaation code back to the User       
+# {
+# 	"username": "user2",
+#}
+#If success I will return 1 else I will state the error message
+@api_view(['POST'] )
+def re_sendVerification(request,*args,**kwargs):
+    try:
+        get_username_serializer = get_usernameserializer()
+        usercode = get_username_serializer.getUsername(request.data)
+        userobj = User.objects.get(username=usercode)
+        send_vertification_email(userobj.email)
+        return Response({"Result": 1}, status=200) 
+
+    except ObjectDoesNotExist:
+
+        data={
+            "Result": "No existing account with that username had been registerd in our record, Please re-create"
+        }
+
+        return Response(data,status=404)
+
 
 
 
@@ -386,15 +410,15 @@ def makeOrder(request,*args, **kwargs):
         }
 
         if(result_value ==1):
-            #try:
+            try:
                 send_OrderMake_email(requsercode,postcode) 
-            #except:
+            except:
                 #if email FAILED For some funny reason 
-                #return Response({"Result": -1}, status=500) 
+                return Response({"Result": -1}, status=500) 
            
 
 
-    return Response(data, status=200) 
+        return Response(data, status=200) 
 
 
 
