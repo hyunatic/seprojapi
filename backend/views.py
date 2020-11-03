@@ -153,7 +153,7 @@ def create_User(request,*args,**kwargs):
             data= {
             "Result": 1
             }
-            send_vertification_email(emailcode) 
+            #send_vertification_email(emailcode) 
             try:
                 send_vertification_email(emailcode) 
                 return Response(data, status=200) 
