@@ -63,6 +63,7 @@ class VertificationView(View):
                 return  redirect("http://www.github.com")
         except Exception as ex:
             print(str(ex))
+            return  redirect("http://seproj.s3-website-ap-southeast-1.amazonaws.com/register")
 
 
      
