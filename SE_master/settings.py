@@ -25,7 +25,7 @@ STATIC_URL = '/static/'
 SECRET_KEY = 'x2gr3ghi62u9rxz!lquf62aztu#wt(dnsj8w78lw87m5fm2c#7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 
