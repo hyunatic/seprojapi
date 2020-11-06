@@ -59,7 +59,7 @@ class UpdateItemSeralizer(serializers.ModelSerializer):
         model = Post
         fields=('Postid','ItemName','Description','PostDate')
     
-    def updatePost(Self,validated_data):
+    def updatePost(self,validated_data):
         postobj= Post.objects.get(pk=validated_data['Postid'])
 
         postobj.ItemName = validated_data['ItemName']
