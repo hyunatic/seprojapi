@@ -21,7 +21,7 @@ class Profile(models.Model):
     
     class Meta:
         db_table='Profile'
-        managed=False
+        managed=True
 
 #This is your database Schema or MAP TO YOUR SQL
 #Content is the column therefore 
@@ -37,7 +37,7 @@ class Post(models.Model):
 
     class Meta:
         db_table='Post'
-        managed=False
+        managed=True
 
 
 class Order(models.Model):
